@@ -7,14 +7,11 @@ import {
   useScroll,
   MotionValue,
   useMotionValue,
+  useTransform,
 } from "motion/react";
 import * as React from "react";
-import { clamp } from "./clamp";
-import * as Icons from "./icons";
-import { useScrollEnd } from "./use-scroll-end";
 import { useSound } from "./use-sound";
-import { useMediaQuery } from "./use-media-query";
-import { useIsHydrated } from "./use-is-hydrated";
+import { CourseProfileSVG } from "./course-profile";
 
 export const CURSOR_SIZE = 40;
 export const CURSOR_CENTER = CURSOR_SIZE / 2;
@@ -33,26 +30,62 @@ export const LINE_STEP = LINE_WIDTH + LINE_GAP;
 export const MIN = 0;
 export const MAX = LINE_STEP * (LINE_COUNT - 1);
 
-// Controls scroll speed (higher = faster)
-// Set to 1 for no smoothing at all
+// Controls scroll smoothing (lower = more smooth, higher = more responsive)
 export const SCROLL_SMOOTHING = 0.2;
 
 // Transformer constants
 export const DEFAULT_INTENSITY = 7;
 export const DISTANCE_LIMIT = 48;
 
-// Linear interpolation function for smooth transitions
-export function lerp(start: number, end: number, factor: number): number {
-  return start + (end - start) * factor;
-}
-
 export default function LineMinimap() {
   const tick = useSound("/sounds/tick.mp3", SOUND_OPTIONS);
-  const scrollX = useScrollX(MAX, tick);
-  const { mouseX, onMouseMove, onMouseLeave } = useMouseX();
   const popClick = useSound("/sounds/pop-click.wav", SOUND_OPTIONS);
 
+  // Use Motion's useScroll for scroll tracking
+  const { scrollY, scrollYProgress } = useScroll();
 
+  // Transform scroll progress to horizontal position using useTransform
+  const scrollX = useTransform(scrollYProgress, [0, 1], [0, MAX]);
+
+  // Use useSpring for smooth animations with configurable smoothing
+  const smoothScrollX = useSpring(scrollX, {
+    stiffness: 500 * SCROLL_SMOOTHING,
+    damping: 40,
+    mass: 0.8 / SCROLL_SMOOTHING,
+  });
+
+  // Transform for content movement (inverted)
+  const contentX = useTransform(smoothScrollX, (val: number) => -val);
+
+  const { mouseX, onMouseMove, onMouseLeave } = useMouseX();
+  const lastTickPosition = React.useRef(0);
+  const tickThreshold = LINE_STEP;
+
+  // Handle tick sound on scroll
+  useMotionValueEvent(smoothScrollX, "change", (latest) => {
+    const positionDifference = Math.abs(latest - lastTickPosition.current);
+    if (positionDifference >= tickThreshold) {
+      tick();
+      lastTickPosition.current = latest;
+    }
+  });
+
+  // Handle horizontal scroll conversion
+  React.useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      // Convert vertical scroll to page scroll
+      window.scrollBy(0, e.deltaY);
+    };
+
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    document.body.style.overflowX = 'hidden';
+
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+      document.body.style.overflowX = 'auto';
+    };
+  }, []);
 
   function onPointerDown() {
     popClick();
@@ -60,24 +93,42 @@ export default function LineMinimap() {
 
   return (
     <div className="relative" style={{ height: `calc(100vh + ${MAX}px)` }}>
+      {/* Main content that scrolls horizontally */}
       <motion.div
-        className="fixed translate-center"
+        className="fixed inset-0 w-full h-full overflow-hidden"
+        style={{ x: contentX }}
+      >
+        <div className="w-full h-full bg-gradient-to-r from-blue-50 to-purple-50 flex items-center justify-center">
+          <div className="text-4xl font-bold text-gray-800">
+            Horizontal Scrolling Content
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="fixed translate-center z-20"
         onPointerMove={onMouseMove}
         onPointerLeave={onMouseLeave}
+        onPointerDown={onPointerDown}
       >
         <div className="flex items-end" style={{ gap: LINE_GAP }}>
           {[...Array(LINE_COUNT)].map((_, i) => (
             <Line
               key={i}
               index={i}
-              scrollX={scrollX}
+              scrollX={smoothScrollX}
               mouseX={mouseX}
               active={isActive(i, LINE_COUNT)}
             />
           ))}
         </div>
-        <Indicator x={scrollX} />
+        <Indicator x={smoothScrollX} />
       </motion.div>
+
+      {/* Fixed bottom div that sticks to viewport */}
+      <div className="fixed bottom-0 left-0 right-0 w-full z-10">
+        <CourseProfileSVG />
+      </div>
     </div>
   );
 }
@@ -200,7 +251,7 @@ export function useProximity(
       const currentVelocity = Math.abs(scrollX.getVelocity());
       const velocityThreshold = 300;
       const velocityFactor = Math.min(1, currentVelocity / velocityThreshold);
-      const lerped = lerp(initialValue, targetScale, velocityFactor);
+      const lerped = initialValue + (targetScale - initialValue) * velocityFactor;
       value.set(lerped);
     } else {
       value.set(targetScale);
@@ -209,44 +260,6 @@ export function useProximity(
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-export function useScrollX(max: number = MAX, onTick?: () => void) {
-  const scrollX = useSpring(0, {
-    stiffness: 500,
-    damping: 40,
-    // Lower mass for faster response
-    mass: 0.8,
-  });
-
-  const { scrollY } = useScroll();
-  const targetX = React.useRef(0);
-  const lastTickPosition = React.useRef(0);
-  const tickThreshold = LINE_STEP; // Tick every line step
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const newTargetX = clamp(latest, [0, max]);
-    const positionDifference = Math.abs(newTargetX - lastTickPosition.current);
-
-    // Play tick sound when crossing threshold
-    if (positionDifference >= tickThreshold && onTick) {
-      onTick();
-      lastTickPosition.current = newTargetX;
-    }
-
-    targetX.current = newTargetX;
-  });
-
-  useRequestAnimationFrame(() => {
-    const currentX = scrollX.get();
-    const smoothX = lerp(currentX, targetX.current, SCROLL_SMOOTHING);
-    // Only update if there's a meaningful difference
-    if (Math.abs(smoothX - currentX) > 0.01) {
-      scrollX.set(smoothX);
-    }
-  });
-
-  return scrollX;
-}
 
 export function useMouseX() {
   const mouseX = useMotionValue<number>(0);
@@ -263,25 +276,6 @@ export function useMouseX() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-export function useRequestAnimationFrame(callback: () => void) {
-  const requestRef = React.useRef<number | null>(null);
-
-  const animate = () => {
-    callback();
-    requestRef.current = requestAnimationFrame(animate);
-  };
-
-  React.useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (requestRef.current !== null) {
-        cancelAnimationFrame(requestRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-}
 
 export function isActive(index: number, count: number): boolean {
   // First and last ticks are always active
