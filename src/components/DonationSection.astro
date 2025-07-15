@@ -1,7 +1,6 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Page from "../components/react/page";
 import { db, Supporters, Campaigns, eq, desc } from "astro:db";
+import DonationCard from "./react/donation-card";
 
 // Fetch campaign data
 const campaign = await db
@@ -35,6 +34,4 @@ const campaignData = {
 };
 ---
 
-<Layout>
-  <Page campaignData={campaignData} client:only="react" />
-</Layout>
+<DonationCard campaignData={campaignData} client:load />

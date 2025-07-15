@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/db": "^0.15.0",
     "@astrojs/react": "^4.3.0",
     "@tailwindcss/vite": "^4.1.11",
     "@types/react": "^19.1.8",
@@ -19,5 +20,9 @@
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11",
     "use-sound": "^5.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.1",
+    "ultracite": "5.0.36"
   }
 }

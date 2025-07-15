@@ -1,5 +1,3 @@
-"use client";
-
 import {
   motion,
   useSpring,
@@ -8,6 +6,7 @@ import {
   MotionValue,
   useMotionValue,
   useTransform,
+  useMotionTemplate,
 } from "motion/react";
 import * as React from "react";
 import { useSound } from "./use-sound";
@@ -20,15 +19,21 @@ export const CURSOR_LARGE_HEIGHT = 400;
 export const POINTER_SPRING = { stiffness: 500, damping: 40 };
 const SOUND_OPTIONS = { volume: 0.1 };
 
-export const LINE_GAP = 8;
+export const COURSE_LENGTH = 108.21;
 export const LINE_WIDTH = 1;
-export const LINE_COUNT = 40;
-export const LINE_HEIGHT = 24;
-export const LINE_HEIGHT_ACTIVE = 32;
+export const LINE_COUNT = Math.round(COURSE_LENGTH * 10); // 1082 lines for 108.21 miles at 0.1 mile intervals
+export const LINE_STEP = 0.1;
 
-export const LINE_STEP = LINE_WIDTH + LINE_GAP;
+// Course profile width to match page.tsx
+export const COURSE_PROFILE_WIDTH = 3072;
+// Calculate spacing between lines to cover the full course profile width
+export const LINE_GAP = COURSE_PROFILE_WIDTH / LINE_COUNT; // ~2.84px spacing
+
+export const LINE_HEIGHT = 20;
+export const LINE_HEIGHT_ACTIVE = 40;
+
 export const MIN = 0;
-export const MAX = LINE_STEP * (LINE_COUNT - 1);
+export const MAX = COURSE_PROFILE_WIDTH; // Use course profile width instead of COURSE_LENGTH * 10
 
 // Controls scroll smoothing (lower = more smooth, higher = more responsive)
 export const SCROLL_SMOOTHING = 0.2;
@@ -57,9 +62,13 @@ export default function LineMinimap() {
   // Transform for content movement (inverted)
   const contentX = useTransform(smoothScrollX, (val: number) => -val);
 
-  const { mouseX, onMouseMove, onMouseLeave } = useMouseX();
+  // Calculate distance along the 108.21-mile course based on minimap position
+  // The course profile SVG is 3072px wide, so we map the minimap indicator position to miles
+  const distance = useTransform(smoothScrollX, [0, MAX], [0, COURSE_LENGTH]);
+
+  const { mouseX, mouseY, onMouseMove, onMouseLeave } = useMousePosition();
   const lastTickPosition = React.useRef(0);
-  const tickThreshold = LINE_STEP;
+  const tickThreshold = LINE_GAP; // Use LINE_GAP for pixel-based threshold
 
   // Handle tick sound on scroll
   useMotionValueEvent(smoothScrollX, "change", (latest) => {
@@ -99,19 +108,17 @@ export default function LineMinimap() {
         style={{ x: contentX }}
       >
         <div className="w-full h-full bg-gradient-to-r from-blue-50 to-purple-50 flex items-center justify-center">
-          <div className="text-4xl font-bold text-gray-800">
-            Horizontal Scrolling Content
-          </div>
         </div>
       </motion.div>
 
       <motion.div
         className="fixed translate-center z-20"
+        style={{ width: `${COURSE_PROFILE_WIDTH}px` }}
         onPointerMove={onMouseMove}
         onPointerLeave={onMouseLeave}
         onPointerDown={onPointerDown}
       >
-        <div className="flex items-end" style={{ gap: LINE_GAP }}>
+        <div className="flex items-end justify-between" style={{ width: '100%' }}>
           {[...Array(LINE_COUNT)].map((_, i) => (
             <Line
               key={i}
@@ -122,13 +129,8 @@ export default function LineMinimap() {
             />
           ))}
         </div>
-        <Indicator x={smoothScrollX} />
+        <Indicator x={smoothScrollX} distance={distance} mouseY={mouseY} />
       </motion.div>
-
-      {/* Fixed bottom div that sticks to viewport */}
-      <div className="fixed bottom-0 left-0 right-0 w-full z-10">
-        <CourseProfileSVG />
-      </div>
     </div>
   );
 }
@@ -147,7 +149,8 @@ function Line({
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const scaleY = useSpring(1, { damping: 45, stiffness: 600 });
-  const centerX = index * LINE_STEP + LINE_WIDTH / 2;
+  // Calculate centerX based on position within the course profile width
+  const centerX = (index / (LINE_COUNT - 1)) * COURSE_PROFILE_WIDTH;
 
   useProximity(scaleY, {
     ref,
@@ -261,18 +264,21 @@ export function useProximity(
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-export function useMouseX() {
+export function useMousePosition() {
   const mouseX = useMotionValue<number>(0);
+  const mouseY = useMotionValue<number>(0);
 
   function onPointerMove(e: React.PointerEvent) {
     mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
   }
 
   function onPointerLeave() {
     mouseX.set(0);
+    mouseY.set(0);
   }
 
-  return { mouseX, onMouseMove: onPointerMove, onMouseLeave: onPointerLeave };
+  return { mouseX, mouseY, onMouseMove: onPointerMove, onMouseLeave: onPointerLeave };
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,32 +286,71 @@ export function useMouseX() {
 export function isActive(index: number, count: number): boolean {
   // First and last ticks are always active
   if (index === 0 || index === count - 1) return true;
-  // Calculate the step size between active ticks
-  const step = count / (Math.floor(count / LINE_GAP) + 1);
-  // Check if this index is close to a multiple of the step
-  return Math.abs(index % step) < 0.5 || Math.abs((index % step) - step) < 0.5;
+
+  // Show active ticks every 10 units (every 1 mile since we have 10 lines per mile)
+  const mileInterval = 10;
+  return index % mileInterval === 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-export function Indicator({ x }: { x: MotionValue<number> }) {
+function MileMarkerTooltip({
+  distance,
+  x,
+  mouseY
+}: {
+  distance: MotionValue<number>;
+  x: MotionValue<number>;
+  mouseY: MotionValue<number>
+}) {
+  const distanceText = useTransform(distance, (value) => `${value.toFixed(1)} mi`);
+  const isVisible = useTransform(mouseY, (value) => value > 0);
+
   return (
     <motion.div
-      className="flex flex-col bg-orange w-[1px] items-center absolute h-[100vh]! -top-8"
-      style={{ x }}
+      className="absolute pointer-events-none z-30 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg"
+      style={{
+        x: x,
+        y: mouseY,
+        transform: "translateX(-50%)",
+        opacity: isVisible,
+      }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <svg
-        width="7"
-        height="6"
-        viewBox="0 0 7 6"
-        fill="none"
-        className="-translate-y-3"
-      >
-        <path
-          d="M3.54688 6L0.515786 0.75L6.57796 0.75L3.54688 6Z"
-          fill="var(--color-orange)"
-        />
-      </svg>
+      <motion.span>{distanceText}</motion.span>
     </motion.div>
+  );
+}
+
+export function Indicator({
+  x,
+  distance,
+  mouseY
+}: {
+  x: MotionValue<number>;
+  distance: MotionValue<number>;
+  mouseY: MotionValue<number>
+}) {
+  return (
+    <>
+      <motion.div
+        className="flex flex-col bg-pink11 w-[1px] items-center absolute h-[100vh]! -top-8"
+        style={{ x }}
+      >
+        <svg
+          width="7"
+          height="6"
+          viewBox="0 0 7 6"
+          fill="none"
+          className="-translate-y-3"
+        >
+          <path
+            d="M3.54688 6L0.515786 0.75L6.57796 0.75L3.54688 6Z"
+            fill="var(--color-pink11)"
+          />
+        </svg>
+      </motion.div>
+      <MileMarkerTooltip distance={distance} x={x} mouseY={mouseY} />
+    </>
   );
 }

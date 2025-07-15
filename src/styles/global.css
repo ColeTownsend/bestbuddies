@@ -1,8 +1,24 @@
 @import "tailwindcss";
 
 ::selection {
-  background: var(--color-orange);
+  background: var(--color-pink11);
   color: white;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 400;
+  font-family: "Silkscreen", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+h1 {
+  color: var(--color-pink11);
 }
 
 @theme {
@@ -10,7 +26,7 @@
     "Area Normal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
     Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: "supply", "Menlo", monospace;
+  --font-mono: "Supply", "Menlo", monospace;
   /* Font size */
   --text-10: 0.625rem;
   --text-12: 0.75rem;
@@ -153,7 +169,7 @@
   --color-pink8: hsl(323, 60.3%, 72.4%);
   --color-pink9: hsl(322, 65%, 54.5%);
   --color-pink10: hsl(322, 63.9%, 50.7%);
-  --color-pink11: hsl(322, 75%, 46%);
+  --color-pink11: hsl(329, 100%, 53%);
   --color-pink12: hsl(320, 70%, 13.5%);
   /* Red */
   --color-red1: hsl(359, 100%, 99.4%);
@@ -422,6 +438,19 @@
     max-width: var(--max-width);
   }
 
+  /* Alternating backgrounds for supporters list */
+  .supporters-list>div:nth-child(even) {
+    @apply bg-neutral-50;
+  }
+
+  .supporters-list>div:nth-child(odd) {
+    @apply bg-white;
+  }
+
+  .supporters-list>div:hover {
+    @apply bg-neutral-100;
+  }
+
   a,
   button,
   input,
@@ -432,4 +461,12 @@
       outline: 2px solid var(--color-focus);
     }
   }
+}
+
+.main {
+  position: relative;
+}
+
+.text-base {
+  line-height: 28px;
 }
