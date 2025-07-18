@@ -216,13 +216,13 @@ export default function Page({ campaignData }: PageProps) {
 
         <div
           className="absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible"
-          style={{ zIndex: 100 }}
+          style={{ zIndex: 90 }}
         >
           <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
 
         </div>
       </div>
-      <Indicator x={mouseX} />
+      <Indicator x={mouseX} mouseY={mouseY} scrollX={scrollX} fundraised={campaignData?.currentAmount || 0} />
 
     </main>
   );
