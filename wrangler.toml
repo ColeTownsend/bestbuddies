@@ -1,2 +1,11 @@
-name = "best-buddies"
-compatibility_date = "2024-01-01"
+name = "bestbuddies"
+main = "./dist/_worker.js/index.js"
+compatibility_date = "2025-03-25"
+compatibility_flags = [ "nodejs_compat" ]
+
+[assets]
+binding = "ASSETS"
+directory = "./dist"
+
+[observability]
+enabled = true
