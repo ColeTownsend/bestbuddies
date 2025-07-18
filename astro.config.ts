@@ -1,4 +1,4 @@
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig } from 'astro/config';
 
 import react from '@astrojs/react';
 import db from '@astrojs/db';
@@ -14,12 +14,5 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()]
-  },
-  experimental: {
-    fonts: [{
-      provider: fontProviders.google(),
-      name: "Silkscreen",
-      cssVariable: "--font-silkscreen"
-    }]
   }
 });

@@ -1,11 +1,9 @@
 name = "bestbuddies"
 compatibility_date = "2025-03-25"
+compatibility_flags = ["nodejs_compat"]
 
 [assets]
 directory = "./dist"
-
-[observability]
-enabled = true
 
 [vars]
 ASTRO_DB_REMOTE_URL = "libsql://best-buddies-coletownsend.aws-us-east-1.turso.io"
