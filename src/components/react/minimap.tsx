@@ -39,7 +39,7 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<
   });
 
   // Calculate miles based on indicator's x position + scroll position relative to course profile SVG width
-  const miles = useTransform([x, scrollX], ([mouseX, scrollXValue]) => {
+  const miles = useTransform([x, scrollX], ([mouseX, scrollXValue]: [number, number]) => {
     // Calculate the actual position on the page (mouse position + scroll)
     const pageX = mouseX + scrollXValue;
     // Use the actual course profile SVG width (3072px) to calculate ratio
@@ -60,7 +60,7 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<
 
   // Format the smoothed miles to one decimal place
   const formattedMiles = useTransform(smoothMiles, (value) => parseFloat(value).toFixed(1));
-  
+
   // Create a template for the miles display
   const milesDisplay = useMotionTemplate`${formattedMiles} MI`;
 
