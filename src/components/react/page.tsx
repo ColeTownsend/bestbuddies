@@ -2,16 +2,14 @@ import {
   motion,
   useSpring,
   useMotionValueEvent,
-  useScroll,
-  MotionValue,
   useMotionValue,
-  useTransform,
-  useMotionTemplate,
 } from "motion/react";
 import * as React from "react";
 import { useSound } from "./use-sound";
 import courseProfileSvg from "../../assets/course-profile.svg";
 import DonationCard from "./donation-card";
+import { useMousePosition } from "./utils";
+import { Indicator } from "./minimap";
 
 interface CampaignData {
   currentAmount: number;
@@ -24,21 +22,49 @@ interface PageProps {
   campaignData?: CampaignData;
 }
 
-const SOUND_OPTIONS = { volume: 0.1 };
+const POP_SOUND_OPTIONS = { volume: 0.3 };
+const TICK_SOUND_OPTIONS = { volume: 0.1 }
+
+export const COURSE_LENGTH = 108.21;
+export const LINE_WIDTH = 1;
+export const LINE_COUNT = Math.round(COURSE_LENGTH * 10); // 1082 lines for 108.21 miles at 0.1 mile intervals
+export const LINE_STEP = 0.1;
+
+// Course profile width to match page.tsx
+export const COURSE_PROFILE_WIDTH = 3072;
+// Calculate spacing between lines to cover the full course profile width
+export const LINE_GAP = COURSE_PROFILE_WIDTH / LINE_COUNT; // ~2.84px spacing
+
+export const MIN = 0;
+export const MAX = COURSE_PROFILE_WIDTH;
 
 // Controls scroll smoothing (lower = more smooth, higher = more responsive)
-const SCROLL_SMOOTHING = 0.2;
+const SCROLL_SMOOTHING = 0.25;
 
 export default function Page({ campaignData }: PageProps) {
-  const popClick = useSound("/sounds/pop-click.wav", SOUND_OPTIONS);
+  const popClick = useSound("/sounds/pop-click.wav", POP_SOUND_OPTIONS);
+  const tick = useSound("/sounds/tick.mp3", TICK_SOUND_OPTIONS);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Motion values for smooth scroll
   const scrollX = useMotionValue(0);
   const smoothScrollX = useSpring(scrollX, {
-    stiffness: 500 * SCROLL_SMOOTHING,
+    stiffness: 400 * SCROLL_SMOOTHING,
     damping: 40,
     mass: 0.8 / SCROLL_SMOOTHING,
+  });
+
+  const { mouseX, mouseY, onMouseMove, onMouseLeave } = useMousePosition();
+  const lastTickPosition = React.useRef(0);
+  const tickThreshold = 50; // Tick every 10 pixels of scrolling
+
+  // Handle tick sound on scroll
+  useMotionValueEvent(smoothScrollX, "change", (latest) => {
+    const positionDifference = Math.abs(latest - lastTickPosition.current);
+    if (positionDifference >= tickThreshold) {
+      tick();
+      lastTickPosition.current = latest;
+    }
   });
 
   React.useEffect(() => {
@@ -107,7 +133,11 @@ export default function Page({ campaignData }: PageProps) {
   });
 
   return (
-    <main className="main relative h-screen min-w-screen overflow-hidden">
+    <main
+      className="main relative h-screen min-w-screen overflow-hidden"
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+    >
       <div
         ref={containerRef}
         style={{
@@ -118,9 +148,9 @@ export default function Page({ campaignData }: PageProps) {
         }}
         className="scroll-container relative grid overflow-x-scroll h-full gap-16 p-16 items-center bg-neutral-200"
       >
-        <section className="grid bg-white grid-cols-3 gap-8 font-semibold w-[1440px] p-16 h-[720px]">
+        <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
           <div className="col-span-3">
-            <h1 className="text-6xl font-normal text-gray-800">
+            <h1 className="text-6xl font-normal mb-8 text-gray-800">
               Best Buddies Challenge
             </h1>
           </div>
@@ -151,9 +181,9 @@ export default function Page({ campaignData }: PageProps) {
 
         </section>
 
-        <section className="grid bg-white grid-cols-3 gap-8 font-semibold w-[1440px] p-16 h-[720px]">
+        <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
           <div className="col-span-3">
-            <h1 className="text-6xl font-normal text-gray-800">
+            <h1 className="text-6xl font-normal mb-8 text-gray-800">
               Best Buddies Challenge
             </h1>
           </div>
@@ -184,10 +214,15 @@ export default function Page({ campaignData }: PageProps) {
           </div>
         </section>
 
-        <div className="absolute bottom-0 left-0 w-[3072px]">
-          <img src={courseProfileSvg.src} alt="Course Profile" className="w-full object-cover" />
+        <div
+          className="absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible"
+          style={{ zIndex: 100 }}
+        >
+          <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
+
         </div>
       </div>
+      <Indicator x={mouseX} />
 
     </main>
   );
