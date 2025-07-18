@@ -1,23 +1,28 @@
 ---
-import { db, Supporters, Campaigns, eq, desc } from "astro:db";
+import { CampaignQueries, SupporterQueries } from "../lib/db";
 import DonationCard from "./react/donation-card";
 
 // Fetch campaign data
-const campaign = await db
-  .select()
-  .from(Campaigns)
-  .where(eq(Campaigns.id, 1))
-  .get();
+console.log('🔍 [DonationSection] Fetching campaign data...');
+let campaign;
+try {
+  campaign = await CampaignQueries.getCampaign(1);
+  console.log('✅ [DonationSection] Campaign fetched:', campaign);
+} catch (error) {
+  console.error('❌ [DonationSection] Campaign fetch error:', error);
+  throw error;
+}
 
 // Fetch supporters ordered by creation date (most recent first)
-const supporters = await db
-  .select({
-    name: Supporters.name,
-    donation_amount: Supporters.donation_amount,
-    created_at: Supporters.created_at,
-  })
-  .from(Supporters)
-  .orderBy(desc(Supporters.created_at));
+console.log('🔍 [DonationSection] Fetching supporters...');
+let supporters;
+try {
+  supporters = await SupporterQueries.getAllSupporters();
+  console.log('✅ [DonationSection] Supporters fetched:', supporters.length, 'records');
+} catch (error) {
+  console.error('❌ [DonationSection] Supporters fetch error:', error);
+  throw error;
+}
 
 // Calculate current amount from sum of donations
 const totalAmount = supporters.reduce(

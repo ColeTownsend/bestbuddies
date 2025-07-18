@@ -1,4 +1,4 @@
-import { db, Supporters, eq } from 'astro:db';
+import { SupporterQueries } from '../src/lib/db';
 
 /**
  * Deletes a supporter (donation data is included in the supporter record)
@@ -7,13 +7,10 @@ import { db, Supporters, eq } from 'astro:db';
  */
 export async function deleteSupporter(supporterId: number) {
   try {
-    // Delete the supporter (which includes their donation data)
-    const deletedSupporter = await db
-      .delete(Supporters)
-      .where(eq(Supporters.id, supporterId));
+    const deletedSupporter = await SupporterQueries.deleteSupporter(supporterId);
 
     return {
-      deletedSupporter: (deletedSupporter.changes || 0) > 0
+      deletedSupporter
     };
   } catch (error) {
     console.error('Error deleting supporter:', error);
@@ -28,12 +25,7 @@ export async function deleteSupporter(supporterId: number) {
  */
 export async function deleteSupporters(supporterIds: number[]) {
   try {
-    let totalDeletedSupporters = 0;
-
-    for (const supporterId of supporterIds) {
-      const result = await deleteSupporter(supporterId);
-      totalDeletedSupporters += result.deletedSupporter ? 1 : 0;
-    }
+    const totalDeletedSupporters = await SupporterQueries.deleteSupporters(supporterIds);
 
     return {
       deletedSupporters: totalDeletedSupporters

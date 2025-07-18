@@ -215,7 +215,7 @@ export default function Page({ campaignData }: PageProps) {
         </section>
 
         <div
-          className="absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible"
+          className="absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible hidden sm:block"
           style={{ zIndex: 90 }}
         >
           <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />

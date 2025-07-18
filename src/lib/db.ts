@@ -1,0 +1,141 @@
+import { createClient } from '@libsql/client';
+
+const TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTI4NzE0ODYsImlkIjoiODhhMDlmNTAtOGY1ZS00NWQ5LThmY2EtMjc0ZWQxNmFkMGMzIiwicmlkIjoiOThjZTAwNWItMmNjYS00NDlkLTkxMWEtMGViMGFmNjY5M2RlIn0.ycxlA93s3zBSOiofpXnpiEgDhQjV5WG-vnemmnt7rmifC4nYstM6zFiplxU2NmZtX2m7_TgSJpj6oEIlQGF6Aw';
+const DB_URL = 'libsql://best-buddies-coletownsend.aws-us-east-1.turso.io';
+
+export const db = createClient({
+  url: DB_URL,
+  authToken: TOKEN,
+});
+
+export interface Campaign {
+  id: number;
+  name: string;
+  goal_amount: number;
+  current_amount: number;
+  description?: string;
+  created_at: string;
+}
+
+export interface Supporter {
+  id: number;
+  name: string;
+  donation_amount: number;
+  campaign_id: number;
+  created_at: string;
+}
+
+export class CampaignQueries {
+  static async getCampaign(id: number): Promise<Campaign | null> {
+    const result = await db.execute({
+      sql: 'SELECT * FROM Campaigns WHERE id = ?',
+      args: [id]
+    });
+    
+    return result.rows[0] as Campaign || null;
+  }
+
+  static async getAllCampaigns(): Promise<Campaign[]> {
+    const result = await db.execute('SELECT * FROM Campaigns ORDER BY created_at DESC');
+    return result.rows as Campaign[];
+  }
+
+  static async createCampaign(campaign: Omit<Campaign, 'id'>): Promise<Campaign> {
+    const result = await db.execute({
+      sql: 'INSERT INTO Campaigns (name, goal_amount, current_amount, description, created_at) VALUES (?, ?, ?, ?, ?) RETURNING *',
+      args: [campaign.name, campaign.goal_amount, campaign.current_amount, campaign.description, campaign.created_at]
+    });
+    
+    return result.rows[0] as Campaign;
+  }
+
+  static async updateCampaign(id: number, updates: Partial<Omit<Campaign, 'id'>>): Promise<Campaign | null> {
+    const setClauses = Object.keys(updates).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updates);
+    
+    const result = await db.execute({
+      sql: `UPDATE Campaigns SET ${setClauses} WHERE id = ? RETURNING *`,
+      args: [...values, id]
+    });
+    
+    return result.rows[0] as Campaign || null;
+  }
+}
+
+export class SupporterQueries {
+  static async getSupporter(id: number): Promise<Supporter | null> {
+    const result = await db.execute({
+      sql: 'SELECT * FROM Supporters WHERE id = ?',
+      args: [id]
+    });
+    
+    return result.rows[0] as Supporter || null;
+  }
+
+  static async getSupportersByCampaign(campaignId: number): Promise<Supporter[]> {
+    const result = await db.execute({
+      sql: 'SELECT * FROM Supporters WHERE campaign_id = ? ORDER BY created_at DESC',
+      args: [campaignId]
+    });
+    
+    return result.rows as Supporter[];
+  }
+
+  static async getAllSupporters(): Promise<Supporter[]> {
+    const result = await db.execute('SELECT * FROM Supporters ORDER BY created_at DESC');
+    return result.rows as Supporter[];
+  }
+
+  static async createSupporter(supporter: Omit<Supporter, 'id'>): Promise<Supporter> {
+    const result = await db.execute({
+      sql: 'INSERT INTO Supporters (name, donation_amount, campaign_id, created_at) VALUES (?, ?, ?, ?) RETURNING *',
+      args: [supporter.name, supporter.donation_amount, supporter.campaign_id, supporter.created_at]
+    });
+    
+    return result.rows[0] as Supporter;
+  }
+
+  static async deleteSupporter(id: number): Promise<boolean> {
+    const result = await db.execute({
+      sql: 'DELETE FROM Supporters WHERE id = ?',
+      args: [id]
+    });
+    
+    return result.rowsAffected > 0;
+  }
+
+  static async deleteSupporters(ids: number[]): Promise<number> {
+    let deleted = 0;
+    
+    for (const id of ids) {
+      const success = await this.deleteSupporter(id);
+      if (success) deleted++;
+    }
+    
+    return deleted;
+  }
+}
+
+export async function initializeTables() {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS Campaigns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      goal_amount INTEGER NOT NULL,
+      current_amount INTEGER NOT NULL,
+      description TEXT,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS Supporters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      donation_amount INTEGER NOT NULL,
+      campaign_id INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (campaign_id) REFERENCES Campaigns(id)
+    )
+  `);
+}
