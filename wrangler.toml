@@ -1,11 +1,12 @@
 name = "bestbuddies"
-main = "./dist/_worker.js/index.js"
 compatibility_date = "2025-03-25"
-compatibility_flags = [ "nodejs_compat" ]
 
 [assets]
-binding = "ASSETS"
 directory = "./dist"
 
 [observability]
 enabled = true
+
+[vars]
+ASTRO_DB_REMOTE_URL = "libsql://best-buddies-coletownsend.aws-us-east-1.turso.io"
+ASTRO_DB_APP_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTIyODczMTIsImlkIjoiODhhMDlmNTAtOGY1ZS00NWQ5LThmY2EtMjc0ZWQxNmFkMGMzIiwicmlkIjoiOThjZTAwNWItMmNjYS00NDlkLTkxMWEtMGViMGFmNjY5M2RlIn0.1JUYHvYVUBHUqidaBNKAyjeUN4BhnM5QGmU3ADwDFpHdoR2Inzm9vGzjBEgMpPbQEmJJamzPJlHBKPRGL7wvBw"
