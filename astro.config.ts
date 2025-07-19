@@ -5,6 +5,8 @@ import cloudflare from '@astrojs/cloudflare';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import metaTags from 'astro-meta-tags';
+
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
@@ -13,7 +15,7 @@ export default defineConfig({
       enabled: true
     }
   }),
-  integrations: [react()],
+  integrations: [react(), metaTags()],
 
   vite: {
     plugins: [tailwindcss()],
