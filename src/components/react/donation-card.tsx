@@ -1,5 +1,6 @@
-import { motion } from "motion/react";
+import { AnimatePresence, motion, useInView } from "motion/react";
 import { SendIcon } from "./send-icon";
+import React from "react";
 
 interface CampaignData {
   currentAmount: number;
@@ -10,6 +11,8 @@ interface CampaignData {
 
 interface DonationCardProps {
   campaignData?: CampaignData;
+  onHoverChange?: (isHovered: boolean) => void;
+  isHovered?: boolean;
 }
 
 // Fallback data in case props aren't provided
@@ -18,23 +21,46 @@ const FALLBACK_DATA: CampaignData = {
   goalAmount: 1800,
   supporters: [
     "COLE TOWNSEND",
-    "BARBARA TOWNSEND",
-    "MICHAEL CHEN"
   ],
-  supportersCount: 20
+  supportersCount: 1
 };
 
-export default function DonationCard({ campaignData }: DonationCardProps) {
-  const data = campaignData || FALLBACK_DATA;
+export default function DonationCard({ campaignData, onHoverChange, isHovered }: DonationCardProps) {
+  const data = FALLBACK_DATA;
   const { currentAmount, goalAmount, supporters, supportersCount } = data;
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: false, margin: "40px" });
 
   return (
-    <div className="bg-neutral-100 rounded-lg p-6 flex flex-col">
+    <motion.div
+      ref={ref}
+      className="bg-neutral-100 rounded-lg p-6 flex flex-col relatibe z-[1000]"
+      onHoverStart={() => onHoverChange?.(true)}
+      onHoverEnd={() => onHoverChange?.(false)}
+    >
       {/* Header with donate text and send button */}
       <div className="flex justify-between items-start mb-6">
-        <span className="text-neutral-400 text-sm font-mono font-medium uppercase tracking-wide">
-          Donate
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-neutral-400 text-sm font-mono font-medium uppercase tracking-wide">
+            Donate
+          </span>
+          {/* Marker that appears when hovering */}
+          {isHovered && (
+            <AnimatePresence>
+              <motion.span
+                layoutId="minimap-marker"
+                className="block"
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "var(--color-pink11)",
+                }}
+                transition={{ duration: 0.3, type: "spring", stiffness: 200, damping: 30 }}
+              />
+            </AnimatePresence>
+          )}
+        </div>
         <motion.button
           onClick={async () => {
             const shareData = {
@@ -57,7 +83,7 @@ export default function DonationCard({ campaignData }: DonationCardProps) {
               }
             } catch (error) {
               // User cancelled or error occurred
-              if (error.name !== 'AbortError') {
+              if (error instanceof Error && error.name !== 'AbortError') {
                 console.error('Share failed:', error);
                 // Fallback to opening link
                 window.open(shareData.url, '_blank', 'noopener,noreferrer');
@@ -65,7 +91,7 @@ export default function DonationCard({ campaignData }: DonationCardProps) {
             }
           }}
           whileHover={{ rotate: 15 }}
-          whileTap={{ rotate: 30 }}
+          whileTap={{ rotate: 45, color: 'black' }}
           className="text-neutral-400 cursor-pointer hover:text-gray-800 transition-colors bg-transparent border-none p-0"
         >
           <SendIcon />
@@ -107,16 +133,43 @@ export default function DonationCard({ campaignData }: DonationCardProps) {
               scrollbarColor: '#d1d5db #f5f5f5'
             }}
           >
-            <div className="p-2 space-y-1 supporters-list">
+            <motion.div layout className="p-2 space-y-1 supporters-list">
+              {/* Animated "Possibly you" supporter */}
+              <AnimatePresence>
+                {isInView && (
+                  <motion.div
+                    initial={{ opacity: 0, filter: 'blur(10px)' }}
+                    animate={{
+                      opacity: 1,
+                      filter: 'blur(0px)',
+                      display: 'block',
+                      transition: {
+                        duration: 0.3,
+                        delay: 0.5,
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 15
+                      }
+                    }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    className="text-pink-600 rounded-2 font-medium text-sm py-1 px-2"
+                  >
+                    Possibly you
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {supporters.map((supporter, index) => (
-                <div
-                  key={index}
-                  className="text-gray-900 rounded-2 font-medium text-sm py-1 px-2 transition-colors"
-                >
-                  {supporter}
-                </div>
+                <AnimatePresence>
+                  <div
+                    key={index}
+                    className="text-gray-900 rounded-2 font-medium text-sm py-1 px-2 transition-colors"
+                  >
+                    {supporter}
+                  </div>
+                </AnimatePresence>
               ))}
-            </div>
+
+            </motion.div>
           </div>
         </div>
 
@@ -125,7 +178,7 @@ export default function DonationCard({ campaignData }: DonationCardProps) {
           href="https://go.twnsnd.co/bbnyc-2025"
           target="_blank"
           rel="noopener noreferrer"
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
           className="text-white block w-full antialiased text-center font-mono uppercase tracking-wide transition-colors"
           style={{
@@ -142,6 +195,6 @@ export default function DonationCard({ campaignData }: DonationCardProps) {
           Make a donation
         </motion.a>
       </div>
-    </div>
+    </motion.div>
   );
 }

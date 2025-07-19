@@ -55,6 +55,9 @@ export default function DesktopPage({ campaignData }: PageProps) {
   });
 
   const { mouseX, mouseY, onMouseMove, onMouseLeave } = useMousePosition();
+
+  // Track donation card hover state
+  const [isDonationCardHovered, setIsDonationCardHovered] = React.useState(false);
   const lastTickPosition = React.useRef(0);
   const tickThreshold = 50; // Tick every 10 pixels of scrolling
 
@@ -210,19 +213,29 @@ export default function DesktopPage({ campaignData }: PageProps) {
           </div>
           {/* Donation Card */}
           <div className="col-span-1">
-            <DonationCard campaignData={campaignData} />
+            <DonationCard
+              campaignData={campaignData}
+              onHoverChange={setIsDonationCardHovered}
+              isHovered={isDonationCardHovered}
+            />
           </div>
         </section>
 
         <div
-          className="absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible hidden sm:block"
+          className="pointer-events-none absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible hidden sm:block"
           style={{ zIndex: 90 }}
         >
           <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
 
         </div>
       </div>
-      <Indicator x={mouseX} mouseY={mouseY} scrollX={scrollX} fundraised={campaignData?.currentAmount || 0} />
+      <Indicator
+        x={mouseX}
+        mouseY={mouseY}
+        scrollX={scrollX}
+        fundraised={campaignData?.currentAmount || 0}
+        isVisible={!isDonationCardHovered}
+      />
 
     </main>
   );

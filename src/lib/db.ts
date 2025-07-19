@@ -1,4 +1,4 @@
-import { createClient } from '@libsql/client';
+import { createClient, type Row } from '@libsql/client';
 
 const TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTI4NzE0ODYsImlkIjoiODhhMDlmNTAtOGY1ZS00NWQ5LThmY2EtMjc0ZWQxNmFkMGMzIiwicmlkIjoiOThjZTAwNWItMmNjYS00NDlkLTkxMWEtMGViMGFmNjY5M2RlIn0.ycxlA93s3zBSOiofpXnpiEgDhQjV5WG-vnemmnt7rmifC4nYstM6zFiplxU2NmZtX2m7_TgSJpj6oEIlQGF6Aw';
 const DB_URL = 'libsql://best-buddies-coletownsend.aws-us-east-1.turso.io';
@@ -6,6 +6,7 @@ const DB_URL = 'libsql://best-buddies-coletownsend.aws-us-east-1.turso.io';
 export const db = createClient({
   url: DB_URL,
   authToken: TOKEN,
+  offline: false,
 });
 
 export interface Campaign {
@@ -25,40 +26,64 @@ export interface Supporter {
   created_at: string;
 }
 
+// Helper functions to convert database rows to typed objects
+function rowToCampaign(row: Row): Campaign {
+  return {
+    id: row.id as number,
+    name: row.name as string,
+    goal_amount: row.goal_amount as number,
+    current_amount: row.current_amount as number,
+    description: row.description as string | undefined,
+    created_at: row.created_at as string,
+  };
+}
+
+function rowToSupporter(row: Row): Supporter {
+  return {
+    id: row.id as number,
+    name: row.name as string,
+    donation_amount: row.donation_amount as number,
+    campaign_id: row.campaign_id as number,
+    created_at: row.created_at as string,
+  };
+}
+
 export class CampaignQueries {
   static async getCampaign(id: number): Promise<Campaign | null> {
     const result = await db.execute({
       sql: 'SELECT * FROM Campaigns WHERE id = ?',
       args: [id]
     });
-    
-    return result.rows[0] as Campaign || null;
+
+    const row = result.rows[0];
+    return row ? rowToCampaign(row) : null;
   }
 
   static async getAllCampaigns(): Promise<Campaign[]> {
     const result = await db.execute('SELECT * FROM Campaigns ORDER BY created_at DESC');
-    return result.rows as Campaign[];
+    return result.rows.map(rowToCampaign);
   }
 
   static async createCampaign(campaign: Omit<Campaign, 'id'>): Promise<Campaign> {
     const result = await db.execute({
       sql: 'INSERT INTO Campaigns (name, goal_amount, current_amount, description, created_at) VALUES (?, ?, ?, ?, ?) RETURNING *',
-      args: [campaign.name, campaign.goal_amount, campaign.current_amount, campaign.description, campaign.created_at]
+      args: [campaign.name, campaign.goal_amount, campaign.current_amount, campaign.description || null, campaign.created_at]
     });
-    
-    return result.rows[0] as Campaign;
+
+    return rowToCampaign(result.rows[0]);
   }
 
   static async updateCampaign(id: number, updates: Partial<Omit<Campaign, 'id'>>): Promise<Campaign | null> {
     const setClauses = Object.keys(updates).map(key => `${key} = ?`).join(', ');
     const values = Object.values(updates);
-    
+
     const result = await db.execute({
       sql: `UPDATE Campaigns SET ${setClauses} WHERE id = ? RETURNING *`,
       args: [...values, id]
     });
-    
-    return result.rows[0] as Campaign || null;
+
+    const row = result.rows[0];
+    return row ? rowToCampaign(row) : null;
   }
 }
 
@@ -68,8 +93,9 @@ export class SupporterQueries {
       sql: 'SELECT * FROM Supporters WHERE id = ?',
       args: [id]
     });
-    
-    return result.rows[0] as Supporter || null;
+
+    const row = result.rows[0];
+    return row ? rowToSupporter(row) : null;
   }
 
   static async getSupportersByCampaign(campaignId: number): Promise<Supporter[]> {
@@ -77,13 +103,13 @@ export class SupporterQueries {
       sql: 'SELECT * FROM Supporters WHERE campaign_id = ? ORDER BY created_at DESC',
       args: [campaignId]
     });
-    
-    return result.rows as Supporter[];
+
+    return result.rows.map(rowToSupporter);
   }
 
   static async getAllSupporters(): Promise<Supporter[]> {
     const result = await db.execute('SELECT * FROM Supporters ORDER BY created_at DESC');
-    return result.rows as Supporter[];
+    return result.rows.map(rowToSupporter);
   }
 
   static async createSupporter(supporter: Omit<Supporter, 'id'>): Promise<Supporter> {
@@ -91,8 +117,8 @@ export class SupporterQueries {
       sql: 'INSERT INTO Supporters (name, donation_amount, campaign_id, created_at) VALUES (?, ?, ?, ?) RETURNING *',
       args: [supporter.name, supporter.donation_amount, supporter.campaign_id, supporter.created_at]
     });
-    
-    return result.rows[0] as Supporter;
+
+    return rowToSupporter(result.rows[0]);
   }
 
   static async deleteSupporter(id: number): Promise<boolean> {
@@ -100,18 +126,18 @@ export class SupporterQueries {
       sql: 'DELETE FROM Supporters WHERE id = ?',
       args: [id]
     });
-    
+
     return result.rowsAffected > 0;
   }
 
   static async deleteSupporters(ids: number[]): Promise<number> {
     let deleted = 0;
-    
+
     for (const id of ids) {
       const success = await this.deleteSupporter(id);
       if (success) deleted++;
     }
-    
+
     return deleted;
   }
 }

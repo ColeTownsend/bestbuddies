@@ -26,7 +26,9 @@ h6 {
   letter-spacing: 0.05em;
 }
 
-h1 {
+h1,
+h2,
+h3 {
   color: var(--color-pink11);
 }
 

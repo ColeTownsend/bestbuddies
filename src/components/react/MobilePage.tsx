@@ -59,7 +59,7 @@ export const MIN = 0;
 export const MAX = COURSE_PROFILE_WIDTH;
 
 // Controls scroll smoothing (lower = more smooth, higher = more responsive)
-const SCROLL_SMOOTHING = 0.25;
+const SCROLL_SMOOTHING = 0.5;
 
 export default function MobilePage({ campaignData }: PageProps) {
   const popClick = useSound("/sounds/pop-click.wav", POP_SOUND_OPTIONS);
@@ -79,6 +79,7 @@ export default function MobilePage({ campaignData }: PageProps) {
 
   // Handle tick sound on scroll
   useMotionValueEvent(smoothScrollY, "change", (latest) => {
+    console.log("latest", latest.toFixed(0));
     const positionDifference = Math.abs(latest - lastTickPosition.current);
     if (positionDifference >= tickThreshold) {
       tick();
@@ -86,120 +87,30 @@ export default function MobilePage({ campaignData }: PageProps) {
     }
   });
 
-  // Handle wheel events for smooth scrolling
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      // Check if the target element or its ancestors are scrollable
-      const target = e.target as HTMLElement;
-      let element = target;
-
-      while (element && element !== container) {
-        const computedStyle = window.getComputedStyle(element);
-        const overflowY = computedStyle.overflowY;
-
-        // If we find a scrollable element, check if it can actually scroll
-        if (overflowY === 'auto' || overflowY === 'scroll') {
-          const canScrollDown = element.scrollTop < element.scrollHeight - element.clientHeight;
-          const canScrollUp = element.scrollTop > 0;
-
-          // Allow native scrolling if the element can scroll in the attempted direction
-          if ((e.deltaY > 0 && canScrollDown) || (e.deltaY < 0 && canScrollUp)) {
-            return; // Don't prevent default, allow native scrolling
-          }
-        }
-
-        element = element.parentElement as HTMLElement;
-      }
-
-      // If we reach here, either no scrollable element was found or it can't scroll
-      // So we proceed with vertical page scrolling
-      e.preventDefault();
-
-      // Convert wheel scroll to vertical and update motion value
-      const scrollAmount = e.deltaY || e.deltaX;
-      const currentScroll = scrollY.get();
-      const newScroll = Math.max(0, Math.min(container.scrollHeight - container.clientHeight, currentScroll + scrollAmount));
-      scrollY.set(newScroll);
-    };
-
-    container.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      container.removeEventListener("wheel", handleWheel);
-    };
-  }, [scrollY]);
-
-  // Handle touch scroll events for mobile devices
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    let isScrolling = false;
-    let scrollTimeout: NodeJS.Timeout;
-
-    const handleScroll = () => {
-      // Update motion value with current scroll position
-      scrollY.set(container.scrollTop);
-
-      // Track scrolling state
-      isScrolling = true;
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        isScrolling = false;
-      }, 100);
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      clearTimeout(scrollTimeout);
-    };
-  }, [scrollY]);
-
   React.useEffect(() => {
     function handleClick() {
       popClick();
     }
     window.addEventListener("click", handleClick);
+    window.addEventListener("touchstart", handleClick)
     return () => {
       window.removeEventListener("click", handleClick);
+      window.removeEventListener("touchstart", handleClick)
     };
   }, [popClick]);
 
-  // Apply smooth scroll position to container (desktop only)
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Only apply smooth scrolling on desktop (when wheel events are available)
-    const isDesktop = 'ontouchstart' in window === false;
-    if (!isDesktop) return;
-
-    const unsubscribe = smoothScrollY.on("change", (latest) => {
-      container.scrollTop = latest;
-    });
-
-    return unsubscribe;
-  }, [smoothScrollY]);
 
   return (
     <main
-      className="main relative h-screen min-w-screen overflow-hidden"
+      className="main relative min-h-screen min-w-screen"
     >
       <div
         ref={containerRef}
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          scrollBehavior: "auto", // We handle smooth scrolling with spring
-        }}
-        className="scroll-container relative flex flex-col overflow-y-scroll h-full gap-4 p-12"
+        className="scroll-container relative flex flex-col overflow-y-scroll h-full gap-4 py-12 px-6"
       >
         <section className="grid bg-white grid-cols-1 gap-8 font-semibold">
           <AnimatedText className="col-span-1">
-            <h1 className="text-4xl font-normal mb-8 text-gray-800">
+            <h1 className="text-4xl font-normal mb-8">
               Best Buddies Challenge
             </h1>
           </AnimatedText>
@@ -236,26 +147,31 @@ export default function MobilePage({ campaignData }: PageProps) {
 
         </div>
 
-        <section className="grid bg-white grid-cols-1 gap-4 font-semibold">
+        <section className="grid bg-white grid-cols-1 font-semibold">
+          <AnimatedText className="col-span-1">
+            <h2 className="text-4xl text-pink- font-normal mb-8 text-gray-800">
+              Fundraising
+            </h2>
+          </AnimatedText>
           <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
-              My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
+              My fundraising goal is $1,800, and I should surpass that.
             </p>
             <p className="text-base mb-4">
-              $25: Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
+              <span className="font-mono font-400 text-[18px]">$25</span> — Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
             </p>
             <p className="text-base mb-4">
-              $50: Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
+              <span className="font-mono font-400 text-[18px]">$50</span> — Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
             </p>
           </AnimatedText>
           <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
-              $100: Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
+              <span className="font-mono font-400 text-[18px]">$100</span> — Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
             </p>
             <p className="text-base mb-4">
-              $250: Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.            </p>
+              <span className="font-mono font-400 text-[18px]">$250</span> — Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.            </p>
             <p className="text-base mb-4">
-              $1,000: Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
+              <span className="font-mono font-400 text-[18px]">$1000</span> — Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
           </AnimatedText>
           <div className="col-span-1">
             <DonationCard campaignData={campaignData} />

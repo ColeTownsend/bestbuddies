@@ -2,37 +2,34 @@
 import Layout from "../layouts/Layout.astro";
 import DesktopPage from "../components/react/DesktopPage";
 import MobilePage from "../components/react/MobilePage";
-import { CampaignQueries, SupporterQueries, initializeTables } from "../lib/db";
+import { CampaignQueries, SupporterQueries, type Supporter } from "../lib/db";
+import type { Campaign } from "../lib/db";
 
 const isMobile = Astro.locals.isMobile;
 
-// Initialize tables on first run
-await initializeTables();
-
 // Fetch campaign data
 console.log("🔍 Fetching campaign data...");
-let campaign;
-try {
-  campaign = await CampaignQueries.getCampaign(1);
-  console.log("✅ Campaign fetched:", campaign);
-} catch (error) {
-  console.error("❌ Campaign fetch error:", error);
-  throw error;
-}
+let campaign: Campaign | null = null;
+// try {
+//   campaign = await CampaignQueries.getCampaign(1);
+//   console.log("✅ Campaign fetched:", campaign);
+// } catch (error) {
+//   console.error("❌ Campaign fetch error:", error);
+// }
 
 // Fetch supporters ordered by creation date (most recent first)
 console.log("🔍 Fetching supporters...");
-let supporters;
-try {
-  supporters = await SupporterQueries.getAllSupporters();
-  console.log("✅ Supporters fetched:", supporters.length, "records");
-} catch (error) {
-  console.error("❌ Supporters fetch error:", error);
-  throw error;
-}
+let supporters: Supporter[] = [];
+// try {
+//   supporters = await SupporterQueries.getAllSupporters();
+//   console.log("✅ Supporters fetched:", supporters.length, "records");
+// } catch (error) {
+//   supporters = [];
+//   console.error("❌ Supporters fetch error:", error);
+// }
 
 // Calculate current amount from sum of donations
-const totalAmount = supporters.reduce(
+const totalAmount = supporters?.reduce(
   (sum, supporter) => sum + supporter.donation_amount,
   0
 );
@@ -41,14 +38,14 @@ const totalAmount = supporters.reduce(
 const campaignData = {
   currentAmount: totalAmount,
   goalAmount: campaign?.goal_amount || 1800,
-  supporters: supporters.map((s) => s.name),
-  supportersCount: supporters.length,
+  supporters: supporters?.map((s) => s.name),
+  supportersCount: supporters?.length || 0,
 };
 ---
 
 <Layout>
   {
-    isMobile ? (
+    !isMobile ? (
       <MobilePage client:only="react" campaignData={campaignData} />
     ) : (
       <DesktopPage client:only="react" campaignData={campaignData} />

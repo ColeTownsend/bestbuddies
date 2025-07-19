@@ -10,6 +10,10 @@ directory = "./dist"
 [observability]
 enabled = true
 
+[[routes]]
+pattern = "bestbuddies.twnsnd.co"
+custom_domain = true
+
 [vars]
 ASTRO_DB_REMOTE_URL = "libsql://best-buddies-coletownsend.aws-us-east-1.turso.io"
 ASTRO_DB_APP_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicm8iLCJpYXQiOjE3NTI4Njk1NTUsImlkIjoiODhhMDlmNTAtOGY1ZS00NWQ5LThmY2EtMjc0ZWQxNmFkMGMzIiwicmlkIjoiOThjZTAwNWItMmNjYS00NDlkLTkxMWEtMGViMGFmNjY5M2RlIn0.lQ1UXe61Gl3qJH92FwTH313bhuBuBw29dqB1s1MWSoXi8_qmx7Dvr6EAN5moOYnPVvV646HLQ7tgmJdLNFv_DQ"
