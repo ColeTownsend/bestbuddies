@@ -3,13 +3,12 @@ import {
   useSpring,
   useMotionValueEvent,
   useMotionValue,
+  useInView,
 } from "motion/react";
 import * as React from "react";
 import { useSound } from "./use-sound";
 import courseProfileSvg from "../../assets/course-profile.svg";
 import DonationCard from "./donation-card";
-import { useMousePosition } from "./utils";
-import { Indicator } from "./minimap";
 
 interface CampaignData {
   currentAmount: number;
@@ -24,6 +23,27 @@ interface PageProps {
 
 const POP_SOUND_OPTIONS = { volume: 0.3 };
 const TICK_SOUND_OPTIONS = { volume: 0.1 }
+
+// Animated text component with opacity and blur
+function AnimatedText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "10px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, filter: "blur(8px)" }}
+      animate={isInView ? { opacity: 1, filter: "blur(0px)" } : { opacity: 0, filter: "blur(8px)" }}
+      transition={{
+        duration: 0.8,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export const COURSE_LENGTH = 108.21;
 export const LINE_WIDTH = 1;
@@ -41,25 +61,24 @@ export const MAX = COURSE_PROFILE_WIDTH;
 // Controls scroll smoothing (lower = more smooth, higher = more responsive)
 const SCROLL_SMOOTHING = 0.25;
 
-export default function Page({ campaignData }: PageProps) {
+export default function MobilePage({ campaignData }: PageProps) {
   const popClick = useSound("/sounds/pop-click.wav", POP_SOUND_OPTIONS);
   const tick = useSound("/sounds/tick.mp3", TICK_SOUND_OPTIONS);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Motion values for smooth scroll
-  const scrollX = useMotionValue(0);
-  const smoothScrollX = useSpring(scrollX, {
+  const scrollY = useMotionValue(0);
+  const smoothScrollY = useSpring(scrollY, {
     stiffness: 400 * SCROLL_SMOOTHING,
     damping: 40,
     mass: 0.8 / SCROLL_SMOOTHING,
   });
 
-  const { mouseX, mouseY, onMouseMove, onMouseLeave } = useMousePosition();
   const lastTickPosition = React.useRef(0);
   const tickThreshold = 50; // Tick every 10 pixels of scrolling
 
   // Handle tick sound on scroll
-  useMotionValueEvent(smoothScrollX, "change", (latest) => {
+  useMotionValueEvent(smoothScrollY, "change", (latest) => {
     const positionDifference = Math.abs(latest - lastTickPosition.current);
     if (positionDifference >= tickThreshold) {
       tick();
@@ -67,17 +86,7 @@ export default function Page({ campaignData }: PageProps) {
     }
   });
 
-  React.useEffect(() => {
-    function handleClick() {
-      popClick();
-    }
-    window.addEventListener("click", handleClick);
-    return () => {
-      window.removeEventListener("click", handleClick);
-    };
-  }, [popClick]);
-
-  // Convert vertical scroll to horizontal scroll with spring smoothing
+  // Handle wheel events for smooth scrolling
   React.useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -106,37 +115,78 @@ export default function Page({ campaignData }: PageProps) {
       }
 
       // If we reach here, either no scrollable element was found or it can't scroll
-      // So we proceed with horizontal page scrolling
+      // So we proceed with vertical page scrolling
       e.preventDefault();
 
-      // Convert vertical scroll to horizontal and update motion value
+      // Convert wheel scroll to vertical and update motion value
       const scrollAmount = e.deltaY || e.deltaX;
-      const currentScroll = scrollX.get();
-      const newScroll = Math.max(0, Math.min(container.scrollWidth - container.clientWidth, currentScroll + scrollAmount));
-      scrollX.set(newScroll);
+      const currentScroll = scrollY.get();
+      const newScroll = Math.max(0, Math.min(container.scrollHeight - container.clientHeight, currentScroll + scrollAmount));
+      scrollY.set(newScroll);
     };
 
-    // Add wheel event listener
     container.addEventListener("wheel", handleWheel, { passive: false });
-
     return () => {
       container.removeEventListener("wheel", handleWheel);
     };
-  }, [scrollX]);
+  }, [scrollY]);
 
-  // Apply smooth scroll to actual container
-  useMotionValueEvent(smoothScrollX, "change", (latest) => {
+  // Handle touch scroll events for mobile devices
+  React.useEffect(() => {
     const container = containerRef.current;
-    if (container) {
-      container.scrollLeft = latest;
+    if (!container) return;
+
+    let isScrolling = false;
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      // Update motion value with current scroll position
+      scrollY.set(container.scrollTop);
+
+      // Track scrolling state
+      isScrolling = true;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 100);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [scrollY]);
+
+  React.useEffect(() => {
+    function handleClick() {
+      popClick();
     }
-  });
+    window.addEventListener("click", handleClick);
+    return () => {
+      window.removeEventListener("click", handleClick);
+    };
+  }, [popClick]);
+
+  // Apply smooth scroll position to container (desktop only)
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Only apply smooth scrolling on desktop (when wheel events are available)
+    const isDesktop = 'ontouchstart' in window === false;
+    if (!isDesktop) return;
+
+    const unsubscribe = smoothScrollY.on("change", (latest) => {
+      container.scrollTop = latest;
+    });
+
+    return unsubscribe;
+  }, [smoothScrollY]);
 
   return (
     <main
       className="main relative h-screen min-w-screen overflow-hidden"
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
     >
       <div
         ref={containerRef}
@@ -144,18 +194,16 @@ export default function Page({ campaignData }: PageProps) {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           scrollBehavior: "auto", // We handle smooth scrolling with spring
-          gridTemplateColumns: "1440px 1440px", // Explicitly set column widths to match sections
         }}
-        className="scroll-container relative grid overflow-x-scroll h-full gap-16 p-16 items-center bg-neutral-200"
+        className="scroll-container relative flex flex-col overflow-y-scroll h-full gap-4 p-12"
       >
-        <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
-          <div className="col-span-3">
-            <h1 className="text-6xl font-normal mb-8 text-gray-800">
+        <section className="grid bg-white grid-cols-1 gap-8 font-semibold">
+          <AnimatedText className="col-span-1">
+            <h1 className="text-4xl font-normal mb-8 text-gray-800">
               Best Buddies Challenge
             </h1>
-          </div>
-          <div className="col-span-1"></div>
-          <div className="col-span-1">
+          </AnimatedText>
+          <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
               This past year I tore my meniscus, and I've been unable to run. I've taken up cycling.
               Cycling has given me an outlet, both physical and mental that I am so so glad to have. It keeps me focused, fit, and out of trouble (mostly).
@@ -166,8 +214,8 @@ export default function Page({ campaignData }: PageProps) {
             <p className="text-base">
               Some of the people I ride with work with a group called <span className="text-pink11">Best Buddies</span>.
             </p>
-          </div>
-          <div className="col-span-1">
+          </AnimatedText>
+          <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
               <span className="text-pink11">Best Buddies International</span> is the largest organization dedicated to ending the social, physical and economic isolation of the 200 million people worldwide with intellectual and developmental disabilities (IDD).
             </p>
@@ -177,17 +225,19 @@ export default function Page({ campaignData }: PageProps) {
             <p className="text-base">
               Running and cycling have given me a place to belong, and I want to support <span className="text-pink11">Best Buddies</span> mission to do the same for others.
             </p>
-          </div>
-
+          </AnimatedText>
         </section>
 
-        <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
-          <div className="col-span-3">
-            <h1 className="text-6xl font-normal mb-8 text-gray-800">
-              Best Buddies Challenge
-            </h1>
-          </div>
-          <div className="col-span-1">
+        <div
+          className="w-full my-4"
+          style={{ zIndex: 90 }}
+        >
+          <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
+
+        </div>
+
+        <section className="grid bg-white grid-cols-1 gap-4 font-semibold">
+          <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
               My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
             </p>
@@ -197,9 +247,8 @@ export default function Page({ campaignData }: PageProps) {
             <p className="text-base mb-4">
               $50: Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
             </p>
-
-          </div>
-          <div className="col-span-1">
+          </AnimatedText>
+          <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
               $100: Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
             </p>
@@ -207,23 +256,12 @@ export default function Page({ campaignData }: PageProps) {
               $250: Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.            </p>
             <p className="text-base mb-4">
               $1,000: Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
-          </div>
-          {/* Donation Card */}
+          </AnimatedText>
           <div className="col-span-1">
             <DonationCard campaignData={campaignData} />
           </div>
         </section>
-
-        <div
-          className="absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible hidden sm:block"
-          style={{ zIndex: 90 }}
-        >
-          <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
-
-        </div>
       </div>
-      <Indicator x={mouseX} mouseY={mouseY} scrollX={scrollX} fundraised={campaignData?.currentAmount || 0} />
-
     </main>
   );
 }
