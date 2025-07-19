@@ -10,23 +10,23 @@ const isMobile = Astro.locals.isMobile;
 // Fetch campaign data
 console.log("🔍 Fetching campaign data...");
 let campaign: Campaign | null = null;
-// try {
-//   campaign = await CampaignQueries.getCampaign(1);
-//   console.log("✅ Campaign fetched:", campaign);
-// } catch (error) {
-//   console.error("❌ Campaign fetch error:", error);
-// }
+try {
+  campaign = await CampaignQueries.getCampaign(1);
+  console.log("✅ Campaign fetched:", campaign);
+} catch (error) {
+  console.error("❌ Campaign fetch error:", error);
+}
 
 // Fetch supporters ordered by creation date (most recent first)
 console.log("🔍 Fetching supporters...");
 let supporters: Supporter[] = [];
-// try {
-//   supporters = await SupporterQueries.getAllSupporters();
-//   console.log("✅ Supporters fetched:", supporters.length, "records");
-// } catch (error) {
-//   supporters = [];
-//   console.error("❌ Supporters fetch error:", error);
-// }
+try {
+  supporters = await SupporterQueries.getAllSupporters();
+  console.log("✅ Supporters fetched:", supporters.length, "records");
+} catch (error) {
+  supporters = [];
+  console.error("❌ Supporters fetch error:", error);
+}
 
 // Calculate current amount from sum of donations
 const totalAmount = supporters?.reduce(
@@ -45,7 +45,7 @@ const campaignData = {
 
 <Layout>
   {
-    !isMobile ? (
+    isMobile ? (
       <MobilePage client:only="react" campaignData={campaignData} />
     ) : (
       <DesktopPage client:only="react" campaignData={campaignData} />

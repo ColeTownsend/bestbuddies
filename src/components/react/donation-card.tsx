@@ -29,12 +29,12 @@ export default function DonationCard({ campaignData, onHoverChange, isHovered }:
   const data = FALLBACK_DATA;
   const { currentAmount, goalAmount, supporters, supportersCount } = data;
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "40px" });
+  const isInView = useInView(ref, { once: true, amount: 'all' });
 
   return (
     <motion.div
       ref={ref}
-      className="bg-neutral-100 rounded-lg p-6 flex flex-col relatibe z-[1000]"
+      className="bg-neutral-100 rounded-lg p-6 flex flex-col relative z-[1000]"
       onHoverStart={() => onHoverChange?.(true)}
       onHoverEnd={() => onHoverChange?.(false)}
     >

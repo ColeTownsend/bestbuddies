@@ -10,6 +10,7 @@ import courseProfileSvg from "../../assets/course-profile.svg";
 import DonationCard from "./donation-card";
 import { useMousePosition } from "./utils";
 import { Indicator } from "./minimap";
+import CourseProfileMask from "./CourseProfileMask";
 
 interface CampaignData {
   currentAmount: number;
@@ -149,7 +150,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
           scrollBehavior: "auto", // We handle smooth scrolling with spring
           gridTemplateColumns: "1440px 1440px", // Explicitly set column widths to match sections
         }}
-        className="scroll-container relative grid overflow-x-scroll h-full gap-16 p-16 items-center bg-neutral-200"
+        className="scroll-container relative grid overflow-x-scroll h-full gap-16 p-12 items-center bg-neutral-200"
       >
         <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
           <div className="col-span-3">
@@ -222,11 +223,13 @@ export default function DesktopPage({ campaignData }: PageProps) {
         </section>
 
         <div
-          className="pointer-events-none absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible hidden sm:block"
-          style={{ zIndex: 90 }}
+          className="pointer-events-none absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible"
+          style={{ zIndex: 10 }}
         >
-          <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
-
+          <CourseProfileMask
+            currentAmount={campaignData?.currentAmount || 0}
+            goalAmount={campaignData?.goalAmount || 1800}
+          />
         </div>
       </div>
       <Indicator

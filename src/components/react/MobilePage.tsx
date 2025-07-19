@@ -27,7 +27,7 @@ const TICK_SOUND_OPTIONS = { volume: 0.1 }
 // Animated text component with opacity and blur
 function AnimatedText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "10px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
     <motion.div
@@ -50,14 +50,6 @@ export const LINE_WIDTH = 1;
 export const LINE_COUNT = Math.round(COURSE_LENGTH * 10); // 1082 lines for 108.21 miles at 0.1 mile intervals
 export const LINE_STEP = 0.1;
 
-// Course profile width to match page.tsx
-export const COURSE_PROFILE_WIDTH = 3072;
-// Calculate spacing between lines to cover the full course profile width
-export const LINE_GAP = COURSE_PROFILE_WIDTH / LINE_COUNT; // ~2.84px spacing
-
-export const MIN = 0;
-export const MAX = COURSE_PROFILE_WIDTH;
-
 // Controls scroll smoothing (lower = more smooth, higher = more responsive)
 const SCROLL_SMOOTHING = 0.5;
 
@@ -76,16 +68,6 @@ export default function MobilePage({ campaignData }: PageProps) {
 
   const lastTickPosition = React.useRef(0);
   const tickThreshold = 50; // Tick every 10 pixels of scrolling
-
-  // Handle tick sound on scroll
-  useMotionValueEvent(smoothScrollY, "change", (latest) => {
-    console.log("latest", latest.toFixed(0));
-    const positionDifference = Math.abs(latest - lastTickPosition.current);
-    if (positionDifference >= tickThreshold) {
-      tick();
-      lastTickPosition.current = latest;
-    }
-  });
 
   React.useEffect(() => {
     function handleClick() {
@@ -108,42 +90,52 @@ export default function MobilePage({ campaignData }: PageProps) {
         ref={containerRef}
         className="scroll-container relative flex flex-col overflow-y-scroll h-full gap-4 py-12 px-6"
       >
-        <section className="grid bg-white grid-cols-1 gap-8 font-semibold">
+        <section className="grid bg-white grid-cols-1 font-semibold">
           <AnimatedText className="col-span-1">
             <h1 className="text-4xl font-normal mb-8">
               Best Buddies Challenge
             </h1>
           </AnimatedText>
-          <AnimatedText className="col-span-1">
+          <AnimatedText>
             <p className="text-base mb-4">
               This past year I tore my meniscus, and I've been unable to run. I've taken up cycling.
               Cycling has given me an outlet, both physical and mental that I am so so glad to have. It keeps me focused, fit, and out of trouble (mostly).
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base mb-4">
               It has also provided me a second identity (although my running identity will never be replaced), and a group to hang out with. I started riding recently and felt so welcomed into the group I now ride with.
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base">
               Some of the people I ride with work with a group called <span className="text-pink11">Best Buddies</span>.
             </p>
           </AnimatedText>
-          <AnimatedText className="col-span-1">
+
+          <AnimatedText>
             <p className="text-base mb-4">
               <span className="text-pink11">Best Buddies International</span> is the largest organization dedicated to ending the social, physical and economic isolation of the 200 million people worldwide with intellectual and developmental disabilities (IDD).
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base mb-4">
-              I'm fundraising to support <span className="text-pink11">Best Buddies'</span> programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD.
+              I'm fundraising to support <span className="text-pink11">Best Buddies'</span> programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD. <a className="text-gray-400" href="https://www.bestbuddies.org/about-us/where-the-dollar-goes/">How they spend their money</a>
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base">
               Running and cycling have given me a place to belong, and I want to support <span className="text-pink11">Best Buddies</span> mission to do the same for others.
             </p>
           </AnimatedText>
+
         </section>
 
         <div
-          className="w-full my-4"
+          className="w-screen my-4 -mx-6"
           style={{ zIndex: 90 }}
         >
-          <img src={courseProfileSvg.src} alt="Course Profile" className="w-full h-full object-cover" />
+          <img src={courseProfileSvg.src} alt="Course Profile" className="w-screen h-full object-cover" />
 
         </div>
 
@@ -157,9 +149,13 @@ export default function MobilePage({ campaignData }: PageProps) {
             <p className="text-base mb-4">
               My fundraising goal is $1,800, and I should surpass that.
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base mb-4">
               <span className="font-mono font-400 text-[18px]">$25</span> — Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base mb-4">
               <span className="font-mono font-400 text-[18px]">$50</span> — Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
             </p>
@@ -173,11 +169,11 @@ export default function MobilePage({ campaignData }: PageProps) {
             <p className="text-base mb-4">
               <span className="font-mono font-400 text-[18px]">$1000</span> — Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
           </AnimatedText>
-          <div className="col-span-1">
+          <div className="col-span-1 mt-8">
             <DonationCard campaignData={campaignData} />
           </div>
         </section>
       </div>
-    </main>
+    </main >
   );
 }

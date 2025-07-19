@@ -73,6 +73,12 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<
   return (
     <motion.div
       className="absolute z-[101] pointer-events-none"
+      initial={{
+        opacity: 0
+      }}
+      animate={{
+        opacity: 1
+      }}
       style={{
         left: '50%',
         top: offsetY,
@@ -114,37 +120,50 @@ export function Indicator({
       className="absolute z-[100] pointer-events-none"
       style={{
         x: smoothX,
-        top: '66px',
+        top: '52px',
         transform: 'translateX(-1px)', // Center on the cursor
       }}
     >
+      <AnimatePresence>
+        {isVisible && (
+          <MileMarkerTooltip x={x} mouseY={mouseY} scrollX={scrollX} fundraised={fundraised} />
+        )}
+      </AnimatePresence>
       {/* Indicator Line */}
-      <motion.div
-        className="flex flex-col w-[1px] border-l border-neutral-400 items-center overflow-visible"
-        style={{
-          borderLeftStyle: 'dashed',
-          borderImageSource: 'repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 8px, transparent 8px, transparent 16px)',
-          borderImageSlice: 1
-        }}
-        initial={{ height: 'calc(100vh - 66px)' }}
-        animate={{
-          height: isVisible ? 'calc(100vh - 66px)' : '0px'
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        <MileMarkerTooltip x={x} mouseY={mouseY} scrollX={scrollX} fundraised={fundraised} />
-      </motion.div>
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            className="flex flex-col w-[1px] border-l border-neutral-400 items-center overflow-visible"
+            style={{
+              borderLeftStyle: 'dashed',
+              borderImageSource: 'repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 8px, transparent 8px, transparent 16px)',
+              height: 'calc(100vh - 52px)',
+              borderImageSlice: 1
+            }}
+            initial={{ scaleY: 1 }}
+            animate={{
+              scaleY: isVisible ? '1' : 0,
+              height: isVisible ? 'calc(100vh - 52px)' : 0,
+            }}
+            exit={{
+              scaleY: 0,
+              height: 0,
+            }}
+            transition={{ duration: 0.2 }}
+          >
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Marker - positioned separately for layout animation */}
       <AnimatePresence>
         {isVisible && (
           <motion.div
             layoutId="minimap-marker"
-            className="absolute -top-2 block"
+            className="absolute -top-2 block translate-x-[-4.5px]"
             style={{
               width: "10px",
               height: "10px",
-              transform: 'translateX(-50%)',
               borderRadius: "50%",
               background: "var(--color-pink11)",
             }}
