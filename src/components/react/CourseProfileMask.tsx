@@ -1,6 +1,7 @@
 import { motion, useSpring, useTransform } from "motion/react";
 import * as React from "react";
 import courseProfileSvg from "../../assets/course-profile.svg";
+import CoursePathAnimator from "./CoursePathAnimator";
 
 interface CourseProfileMaskProps {
   currentAmount: number;
@@ -26,13 +27,6 @@ export default function CourseProfileMask({ currentAmount, goalAmount }: CourseP
 
   return (
     <div className="relative w-full h-full">
-      {/* Base course profile (original color) */}
-      <motion.img
-        src={courseProfileSvg.src}
-        alt="Course Profile"
-        className="inset-0 w-full h-full object-cover"
-      />
-
       {/* Pink overlay with animated mask */}
       <motion.div
         className="absolute inset-0 w-full h-full"
@@ -55,6 +49,15 @@ export default function CourseProfileMask({ currentAmount, goalAmount }: CourseP
           }}
         />
       </motion.div>
+      {/* Base course profile (original color) */}
+      <CoursePathAnimator />
+      <motion.img
+        src={courseProfileSvg.src}
+        alt="Course Profile"
+        className="inset-0 w-full h-full object-cover"
+      />
+
+
     </div>
   );
 }

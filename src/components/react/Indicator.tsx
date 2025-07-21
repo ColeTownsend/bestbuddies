@@ -120,7 +120,7 @@ export function Indicator({
       className="absolute z-[100] pointer-events-none"
       style={{
         x: smoothX,
-        top: '52px',
+        top: 'calc(50vh - 360px + 4px)', // 50vh (center) - 360px (half section height) + 8px (padding)
         transform: 'translateX(-1px)', // Center on the cursor
       }}
     >
@@ -137,13 +137,13 @@ export function Indicator({
             style={{
               borderLeftStyle: 'dashed',
               borderImageSource: 'repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 8px, transparent 8px, transparent 16px)',
-              height: 'calc(100vh - 52px)',
+              height: 'calc(100vh - (50vh - 360px + 4px))',
               borderImageSlice: 1
             }}
             initial={{ scaleY: 1 }}
             animate={{
               scaleY: isVisible ? '1' : 0,
-              height: isVisible ? 'calc(100vh - 52px)' : 0,
+              height: isVisible ? 'calc(100vh - (50vh - 360px + 8px))' : 0,
             }}
             exit={{
               scaleY: 0,

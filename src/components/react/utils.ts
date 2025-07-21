@@ -5,9 +5,17 @@ export function useMousePosition() {
   const mouseY = useMotionValue<number>(0);
 
   function onMouseMove(e: React.MouseEvent) {
-    console.log('Mouse move:', e.clientX, e.clientY);
-    mouseX.set(e.clientX);
-    mouseY.set(e.clientY);
+    // Get the current target's bounding rectangle
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeX = e.clientX - rect.left;
+    const relativeY = e.clientY - rect.top;
+    
+    // Convert back to page coordinates for absolute positioning
+    const pageY = relativeY + rect.top;
+    
+    console.log('Mouse move:', relativeX, pageY);
+    mouseX.set(relativeX);
+    mouseY.set(pageY);
   }
 
   function onMouseLeave() {

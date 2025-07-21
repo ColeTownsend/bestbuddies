@@ -6,10 +6,9 @@ import {
 } from "motion/react";
 import * as React from "react";
 import { useSound } from "./use-sound";
-import courseProfileSvg from "../../assets/course-profile.svg";
 import DonationCard from "./donation-card";
 import { useMousePosition } from "./utils";
-import { Indicator } from "./minimap";
+import { Indicator } from "./Indicator";
 import CourseProfileMask from "./CourseProfileMask";
 
 interface CampaignData {

@@ -2,8 +2,8 @@
 
 @font-face {
   font-family: 'Area';
-  src: url('/fonts/AreaInktrap-Bold.woff') format('woff'),
-    url('/fonts/AreaInktrap-Bold.woff2') format('woff2');
+  src: url('/fonts/AreaInktrap-Semibold.woff') format('woff'),
+    url('/fonts/AreaInktrap-Semibold.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
