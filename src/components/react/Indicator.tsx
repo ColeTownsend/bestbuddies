@@ -20,7 +20,7 @@ const TOOLTIP_OFFSET = 40;
 const COURSE_PROFILE_SVG_WIDTH = 3072; // From course-profile.svg viewBox
 const TOTAL_DISTANCE = 108.21;
 
-function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<number>; mouseY: MotionValue<number>; scrollX: MotionValue<number>; fundraised: number }) {
+function MileMarkerTooltip({ x, mouseY, scrollX, fundraised, gridTop = 0 }: { x: MotionValue<number>; mouseY: MotionValue<number>; scrollX: MotionValue<number>; fundraised: number; gridTop?: number }) {
 
   // Debug: Listen to mouseY changes
   // useMotionValueEvent(mouseY, "change", (latest) => {
@@ -34,8 +34,8 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<
     mass: 0.8,
   });
 
-  // Offset the tooltip above the cursor
-  const offsetY = useTransform(smoothY, (y) => y - TOOLTIP_OFFSET);
+  // Offset the tooltip above the cursor (no gridTop here)
+  const offsetY = useTransform(smoothY, (y) => y - TOOLTIP_OFFSET - gridTop + 40);
 
   // Debug: Listen to smoothY changes
   // useMotionValueEvent(smoothY, "change", (latest) => {
@@ -98,13 +98,15 @@ export function Indicator({
   mouseY,
   scrollX,
   fundraised,
-  isVisible = true
+  isVisible = true,
+  gridTop = 0 // NEW: top offset for alignment
 }: {
   x: MotionValue<number>;
   mouseY: MotionValue<number>;
   scrollX: MotionValue<number>;
   fundraised: number;
   isVisible?: boolean;
+  gridTop?: number; // NEW: top offset for alignment
 }) {
   // Add spring smoothing to the x position
   const smoothX = useSpring(x, {
@@ -123,13 +125,14 @@ export function Indicator({
       className="absolute z-[100] pointer-events-none"
       style={{
         x: smoothX,
-        top: 'calc(50vh - 360px + 4px)', // 50vh (center) - 360px (half section height) + 8px (padding)
+        top: gridTop, // Use gridTop instead of hardcoded 0
+        bottom: 0,
         transform: 'translateX(-1px)', // Center on the cursor
       }}
     >
       <AnimatePresence>
         {isVisible && (
-          <MileMarkerTooltip x={x} mouseY={mouseY} scrollX={scrollX} fundraised={fundraised} />
+          <MileMarkerTooltip x={x} mouseY={mouseY} scrollX={scrollX} fundraised={fundraised} gridTop={gridTop} />
         )}
       </AnimatePresence>
       {/* Indicator Line */}
@@ -139,31 +142,26 @@ export function Indicator({
             className="flex flex-col w-[1px] border-l border-neutral-400 items-center overflow-visible"
             style={{
               borderLeftStyle: 'dashed',
-              borderImageSource: 'repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 8px, transparent 8px, transparent 16px)',
-              height: 'calc(100vh - (50vh - 360px + 4px))',
+              borderImageSource: 'repeating-linear-gradient(to bottom, rgba(221, 221, 221, 0.5) 0px, rgba(221, 221, 221, 0.5) 4px, transparent 4px, transparent 8px)',
+              height: '100%',
               borderImageSlice: 1
             }}
-            initial={{ scaleY: 1 }}
-            animate={{
-              scaleY: isVisible ? '1' : 0,
-              height: isVisible ? 'calc(100vh - (50vh - 360px + 8px))' : 0,
-            }}
+            initial={{ scaleY: 1, opacity: 1 }}
             exit={{
               scaleY: 0,
-              height: 0,
+              opacity: 0,
             }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 1.5, type: "spring", stiffness: 200, damping: 30 }}
           >
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Marker - positioned separately for layout animation */}
       <AnimatePresence>
         {isVisible && (
           <motion.div
             layoutId="minimap-marker"
-            className="absolute -top-2 block translate-x-[-4.5px]"
+            className="absolute -top-[5px] block translate-x-[-4.5px]"
             style={{
               width: "10px",
               height: "10px",

@@ -45,6 +45,8 @@ export default function DesktopPage({ campaignData }: PageProps) {
   const popClick = useSound("/sounds/pop-click.wav", POP_SOUND_OPTIONS);
   const tick = useSound("/sounds/tick.mp3", TICK_SOUND_OPTIONS);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const gridRef = React.useRef<HTMLDivElement>(null); // NEW: ref for #grid
+  const [gridTop, setGridTop] = React.useState(0); // NEW: state for grid top offset
 
   // Motion values for smooth scroll
   const scrollX = useMotionValue(0);
@@ -135,6 +137,19 @@ export default function DesktopPage({ campaignData }: PageProps) {
     }
   });
 
+  React.useEffect(() => {
+    function updateGridTop() {
+      if (gridRef.current) {
+        // Get the top of #grid relative to the viewport
+        const rect = gridRef.current.getBoundingClientRect();
+        setGridTop(rect.top);
+      }
+    }
+    updateGridTop();
+    window.addEventListener('resize', updateGridTop);
+    return () => window.removeEventListener('resize', updateGridTop);
+  }, []);
+
   return (
     <main
       className="main relative h-screen min-w-screen overflow-hidden"
@@ -147,79 +162,82 @@ export default function DesktopPage({ campaignData }: PageProps) {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           scrollBehavior: "auto", // We handle smooth scrolling with spring
-          gridTemplateColumns: "1440px 1440px", // Explicitly set column widths to match sections
         }}
-        className="scroll-container relative grid overflow-x-scroll h-full gap-16 p-12 items-center bg-neutral-200"
+        className="scroll-container relative overflow-x-scroll h-full p-12 grid items-center bg-neutral-200"
       >
-        <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
-          <div className="col-span-3">
-            <h1 className="text-6xl font-normal mb-8 text-gray-800">
-              Best Buddies Challenge
-            </h1>
-          </div>
-          <div className="col-span-1"></div>
-          <div className="col-span-1">
-            <p className="text-base mb-4">
-              This past year I tore my meniscus, and I've been unable to run. I've taken up cycling.
-              Cycling has given me an outlet, both physical and mental that I am so so glad to have. It keeps me focused, fit, and out of trouble (mostly).
-            </p>
-            <p className="text-base mb-4">
-              It has also provided me a second identity (although my running identity will never be replaced), and a group to hang out with. I started riding recently and felt so welcomed into the group I now ride with.
-            </p>
-            <p className="text-base">
-              Some of the people I ride with work with a group called <span className="text-pink11">Best Buddies</span>.
-            </p>
-          </div>
-          <div className="col-span-1">
-            <p className="text-base mb-4">
-              <span className="text-pink11">Best Buddies International</span> is the largest organization dedicated to ending the social, physical and economic isolation of the 200 million people worldwide with intellectual and developmental disabilities (IDD).
-            </p>
-            <p className="text-base mb-4">
-              I'm fundraising to support <span className="text-pink11">Best Buddies'</span> programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD.
-            </p>
-            <p className="text-base">
-              Running and cycling have given me a place to belong, and I want to support <span className="text-pink11">Best Buddies</span> mission to do the same for others.
-            </p>
-          </div>
+        <div id="grid" ref={gridRef} style={{
+          gridTemplateColumns: "1440px 1440px", // Explicitly set column widths to match sections
+        }} className="grid grid-cols-2 gap-16 relative">
+          <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
+            <div className="col-span-3">
+              <h1 className="text-6xl font-normal mb-8 text-gray-800">
+                Best Buddies Challenge
+              </h1>
+            </div>
+            <div className="col-span-1"></div>
+            <div className="col-span-1">
+              <p className="text-base mb-4">
+                This past year I tore my meniscus, and I've been unable to run. I've taken up cycling.
+                Cycling has given me an outlet, both physical and mental that I am so so glad to have. It keeps me focused, fit, and out of trouble (mostly).
+              </p>
+              <p className="text-base mb-4">
+                It has also provided me a second identity (although my running identity will never be replaced), and a group to hang out with. I started riding recently and felt so welcomed into the group I now ride with.
+              </p>
+              <p className="text-base">
+                Some of the people I ride with work with a group called <span className="text-pink11">Best Buddies</span>.
+              </p>
+            </div>
+            <div className="col-span-1">
+              <p className="text-base mb-4">
+                <span className="text-pink11">Best Buddies International</span> is the largest organization dedicated to ending the social, physical and economic isolation of the 200 million people worldwide with intellectual and developmental disabilities (IDD).
+              </p>
+              <p className="text-base mb-4">
+                I'm fundraising to support <span className="text-pink11">Best Buddies'</span> programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD.
+              </p>
+              <p className="text-base">
+                Running and cycling have given me a place to belong, and I want to support <span className="text-pink11">Best Buddies</span> mission to do the same for others.
+              </p>
+            </div>
 
-        </section>
+          </section>
 
-        <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
-          <div className="col-span-3">
-            <h1 className="text-6xl font-normal mb-8 text-gray-800">
-              Best Buddies Challenge
-            </h1>
-          </div>
-          <div className="col-span-1">
-            <p className="text-base mb-4">
-              My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
-            </p>
-            <p className="text-base mb-4">
-              $25: Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
-            </p>
-            <p className="text-base mb-4">
-              $50: Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
-            </p>
+          <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
+            <div className="col-span-3">
+              <h1 className="text-6xl font-normal mb-8 text-gray-800">
+                Best Buddies Challenge
+              </h1>
+            </div>
+            <div className="col-span-1">
+              <p className="text-base mb-4">
+                My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
+              </p>
+              <p className="text-base mb-4">
+                $25: Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
+              </p>
+              <p className="text-base mb-4">
+                $50: Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
+              </p>
 
-          </div>
-          <div className="col-span-1">
-            <p className="text-base mb-4">
-              $100: Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
-            </p>
-            <p className="text-base mb-4">
-              $250: Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.            </p>
-            <p className="text-base mb-4">
-              $1,000: Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
-          </div>
-          {/* Donation Card */}
-          <div className="col-span-1">
-            <DonationCard
-              campaignData={campaignData}
-              onHoverChange={setIsDonationCardHovered}
-              isHovered={isDonationCardHovered}
-            />
-          </div>
-        </section>
+            </div>
+            <div className="col-span-1">
+              <p className="text-base mb-4">
+                $100: Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
+              </p>
+              <p className="text-base mb-4">
+                $250: Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.            </p>
+              <p className="text-base mb-4">
+                $1,000: Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
+            </div>
+            {/* Donation Card */}
+            <div className="col-span-1">
+              <DonationCard
+                campaignData={campaignData}
+                onHoverChange={setIsDonationCardHovered}
+                isHovered={isDonationCardHovered}
+              />
+            </div>
+          </section>
+        </div>
 
         <div
           className="pointer-events-none absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible"
@@ -240,8 +258,8 @@ export default function DesktopPage({ campaignData }: PageProps) {
         scrollX={scrollX}
         fundraised={campaignData?.currentAmount || 0}
         isVisible={!isDonationCardHovered}
+        gridTop={gridTop}
       />
-
     </main>
   );
 }
