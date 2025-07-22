@@ -21,12 +21,11 @@ const COURSE_PROFILE_SVG_WIDTH = 3072; // From course-profile.svg viewBox
 const TOTAL_DISTANCE = 108.21;
 
 function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<number>; mouseY: MotionValue<number>; scrollX: MotionValue<number>; fundraised: number }) {
-  console.log('MileMarkerTooltip', mouseY.get())
 
   // Debug: Listen to mouseY changes
-  useMotionValueEvent(mouseY, "change", (latest) => {
-    console.log('MouseY changed to:', latest);
-  });
+  // useMotionValueEvent(mouseY, "change", (latest) => {
+  //   console.log('MouseY changed to:', latest);
+  // });
 
   // Use mouseY directly for close tracking
   const smoothY = useSpring(mouseY, {
@@ -39,9 +38,9 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<
   const offsetY = useTransform(smoothY, (y) => y - TOOLTIP_OFFSET);
 
   // Debug: Listen to smoothY changes
-  useMotionValueEvent(smoothY, "change", (latest) => {
-    console.log('SmoothY changed to:', latest);
-  });
+  // useMotionValueEvent(smoothY, "change", (latest) => {
+  //   console.log('SmoothY changed to:', latest);
+  // });
 
   // Calculate miles based on indicator's x position + scroll position relative to course profile SVG width
   const miles = useTransform([x, scrollX], (values: number[]) => {
@@ -53,7 +52,6 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised }: { x: MotionValue<
     // Convert to miles (rounded to nearest tenth)
     const milesValue = (ratio * TOTAL_DISTANCE);
     // Debug logging
-    console.log('Miles calc:', { mouseX, scrollXValue, pageX, ratio, milesValue });
     return milesValue;
   });
 
@@ -113,6 +111,11 @@ export function Indicator({
     stiffness: 400,
     damping: 30,
     mass: 0.8,
+  });
+
+  // Debug: Log Indicator smoothX value for comparison with CoursePathAnimator
+  useMotionValueEvent(smoothX, "change", (latest) => {
+    console.log('🎯 Indicator smoothX:', latest.toFixed(1));
   });
 
   return (

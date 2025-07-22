@@ -1,14 +1,17 @@
-import { motion, useSpring, useTransform } from "motion/react";
-import * as React from "react";
+import { motion, useSpring, useTransform, MotionValue } from "framer-motion";
 import courseProfileSvg from "../../assets/course-profile.svg";
 import CoursePathAnimator from "./CoursePathAnimator";
 
 interface CourseProfileMaskProps {
   currentAmount: number;
   goalAmount: number;
+  mouseX: MotionValue<number>;
+  mouseY: MotionValue<number>;
+  scrollX: MotionValue<number>;
 }
 
-export default function CourseProfileMask({ currentAmount, goalAmount }: CourseProfileMaskProps) {
+export default function CourseProfileMask({ currentAmount, goalAmount, mouseX, mouseY, scrollX }: CourseProfileMaskProps) {
+
   // Calculate fill percentage, capped at 100%
   const fillPercentage = Math.min(100, (currentAmount / goalAmount) * 100);
 
@@ -25,8 +28,11 @@ export default function CourseProfileMask({ currentAmount, goalAmount }: CourseP
     (value) => `polygon(0% 0%, ${value}% 0%, ${value}% 100%, 0% 100%)`
   );
 
+
   return (
-    <div className="relative w-full h-full">
+    <div
+      className="relative w-full h-full cursor-none"
+    >
       {/* Pink overlay with animated mask */}
       <motion.div
         className="absolute inset-0 w-full h-full"
@@ -49,15 +55,14 @@ export default function CourseProfileMask({ currentAmount, goalAmount }: CourseP
           }}
         />
       </motion.div>
-      {/* Base course profile (original color) */}
-      <CoursePathAnimator />
+
+      <CoursePathAnimator mouseX={mouseX} mouseY={mouseY} scrollX={scrollX} />
+
       <motion.img
         src={courseProfileSvg.src}
         alt="Course Profile"
         className="inset-0 w-full h-full object-cover"
       />
-
-
     </div>
   );
 }

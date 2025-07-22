@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev --allowed-hosts=cebb55ec4b25.ngrok-free.app",
+    "dev": "astro dev",
     "build": "astro build",
     "preview": "bun wrangler dev",
     "deploy": "bun run build && bun wrangler deploy",

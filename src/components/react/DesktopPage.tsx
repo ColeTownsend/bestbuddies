@@ -228,6 +228,9 @@ export default function DesktopPage({ campaignData }: PageProps) {
           <CourseProfileMask
             currentAmount={campaignData?.currentAmount || 0}
             goalAmount={campaignData?.goalAmount || 1800}
+            mouseX={mouseX}
+            mouseY={mouseY}
+            scrollX={scrollX}
           />
         </div>
       </div>

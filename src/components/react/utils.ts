@@ -9,11 +9,11 @@ export function useMousePosition() {
     const rect = e.currentTarget.getBoundingClientRect();
     const relativeX = e.clientX - rect.left;
     const relativeY = e.clientY - rect.top;
-    
+
     // Convert back to page coordinates for absolute positioning
     const pageY = relativeY + rect.top;
-    
-    console.log('Mouse move:', relativeX, pageY);
+
+    // console.log('Mouse move:', relativeX, pageY);
     mouseX.set(relativeX);
     mouseY.set(pageY);
   }
