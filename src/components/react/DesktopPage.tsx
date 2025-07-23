@@ -170,7 +170,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
         }} className="grid grid-cols-2 gap-16 relative">
           <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
             <div className="col-span-3">
-              <h1 className="text-6xl font-normal mb-8 text-gray-800">
+              <h1 className="text-5xl font-normal mb-8 text-gray-800">
                 Best Buddies Challenge
               </h1>
             </div>
@@ -203,7 +203,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
 
           <section className="grid bg-white grid-cols-3 grid-rows-[auto_1fr] gap-8 font-semibold w-[1440px] p-16 h-[720px]">
             <div className="col-span-3">
-              <h1 className="text-6xl font-normal mb-8 text-gray-800">
+              <h1 className="text-5xl font-normal mb-8 text-gray-800">
                 Best Buddies Challenge
               </h1>
             </div>
@@ -249,6 +249,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
             mouseX={mouseX}
             mouseY={mouseY}
             scrollX={scrollX}
+            gridTop={gridTop}
           />
         </div>
       </div>

@@ -7,7 +7,7 @@ import {
 } from "motion/react";
 import * as React from "react";
 import { useSound } from "./use-sound";
-import courseProfileSvg from "../../assets/course-profile.svg";
+import courseProfileSvg from "./course-profile.svg";
 import DonationCard from "./donation-card";
 
 interface CampaignData {

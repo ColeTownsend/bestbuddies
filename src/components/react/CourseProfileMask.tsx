@@ -1,5 +1,5 @@
-import { motion, useSpring, useTransform, MotionValue } from "framer-motion";
-import courseProfileSvg from "../../assets/course-profile.svg";
+import { motion, useSpring, useTransform, MotionValue } from "motion/react";
+import courseProfileSvg from "./course-profile.svg";
 import CoursePathAnimator from "./CoursePathAnimator";
 
 interface CourseProfileMaskProps {
@@ -8,9 +8,10 @@ interface CourseProfileMaskProps {
   mouseX: MotionValue<number>;
   mouseY: MotionValue<number>;
   scrollX: MotionValue<number>;
+  gridTop?: number;
 }
 
-export default function CourseProfileMask({ currentAmount, goalAmount, mouseX, mouseY, scrollX }: CourseProfileMaskProps) {
+export default function CourseProfileMask({ currentAmount, goalAmount, mouseX, mouseY, scrollX, gridTop = 0 }: CourseProfileMaskProps) {
 
   // Calculate fill percentage, capped at 100%
   const fillPercentage = Math.min(100, (currentAmount / goalAmount) * 100);
@@ -56,7 +57,9 @@ export default function CourseProfileMask({ currentAmount, goalAmount, mouseX, m
         />
       </motion.div>
 
-      <CoursePathAnimator mouseX={mouseX} mouseY={mouseY} scrollX={scrollX} />
+      <div className="absolute inset-0 w-full h-full">
+        <CoursePathAnimator mouseX={mouseX} mouseY={mouseY} scrollX={scrollX} gridTop={gridTop} />
+      </div>
 
       <motion.img
         src={courseProfileSvg.src}

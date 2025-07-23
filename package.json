@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.0",
     "@astrojs/react": "^4.3.0",
+    "@fontsource/permanent-marker": "^5.2.6",
     "@fontsource/silkscreen": "^5.2.6",
     "@libsql/client": "^0.15.10",
     "@reverse-ui/react": "^1.0.39-alpha.0",
