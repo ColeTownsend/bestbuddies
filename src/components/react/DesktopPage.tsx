@@ -10,6 +10,8 @@ import DonationCard from "./donation-card";
 import { useMousePosition } from "./utils";
 import { Indicator } from "./Indicator";
 import CourseProfileMask from "./CourseProfileMask";
+import ElevationProfileSVG from "./ElevationProfileSVG";
+// Elevation data is now managed by the store
 
 interface CampaignData {
   currentAmount: number;
@@ -47,6 +49,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null); // NEW: ref for #grid
   const [gridTop, setGridTop] = React.useState(0); // NEW: state for grid top offset
+  // Elevation data is now managed by the store
 
   // Motion values for smooth scroll
   const scrollX = useMotionValue(0);
@@ -81,6 +84,8 @@ export default function DesktopPage({ campaignData }: PageProps) {
       window.removeEventListener("click", handleClick);
     };
   }, [popClick]);
+
+  // Elevation data loading is now handled by the store
 
   // Convert vertical scroll to horizontal scroll with spring smoothing
   React.useEffect(() => {
@@ -239,17 +244,17 @@ export default function DesktopPage({ campaignData }: PageProps) {
           </section>
         </div>
 
+
         <div
           className="pointer-events-none absolute bottom-0 left-0 right-0 w-[3072px] overflow-visible"
           style={{ zIndex: 10 }}
         >
-          <CourseProfileMask
-            currentAmount={campaignData?.currentAmount || 0}
-            goalAmount={campaignData?.goalAmount || 1800}
+          <ElevationProfileSVG
+            width={3072}
+            height={180}
+            className="w-full"
             mouseX={mouseX}
-            mouseY={mouseY}
             scrollX={scrollX}
-            gridTop={gridTop}
           />
         </div>
       </div>
@@ -260,6 +265,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
         fundraised={campaignData?.currentAmount || 0}
         isVisible={!isDonationCardHovered}
         gridTop={gridTop}
+        // elevationData prop no longer needed - using store
       />
     </main>
   );
