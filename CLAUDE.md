@@ -18,6 +18,10 @@ bun build
 bun preview
 ```
 
+## Development Warnings
+
+- **Never run `bun dev`** - This command may cause unexpected behavior or conflicts
+
 ## Architecture Overview
 
 This is an Astro 5.11.0 project with React 19.1.0 integration for interactive components. The project uses:

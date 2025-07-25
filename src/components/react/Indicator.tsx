@@ -10,17 +10,20 @@ import {
   AnimatePresence,
 } from "motion/react";
 import * as React from "react";
+import { useElevationData, elevationUtils } from "../../stores/elevation-store";
 
 const DASH_COLOR = '#cccccc';
 const DASH_WIDTH = 8;
 const DASH_GAP = 16;
 const TOOLTIP_OFFSET = 40;
 
-// Course profile constants - matches the actual SVG width
-const COURSE_PROFILE_SVG_WIDTH = 3072; // From course-profile.svg viewBox
-const TOTAL_DISTANCE = 108.21;
+// Import constants from centralized location
+// Note: Individual constants will be accessed via store utilities
 
 function MileMarkerTooltip({ x, mouseY, scrollX, fundraised, gridTop = 0 }: { x: MotionValue<number>; mouseY: MotionValue<number>; scrollX: MotionValue<number>; fundraised: number; gridTop?: number }) {
+
+  // Get elevation data from store
+  const { elevationProfile: elevationData } = useElevationData();
 
   // Debug: Listen to mouseY changes
   // useMotionValueEvent(mouseY, "change", (latest) => {
@@ -42,17 +45,13 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised, gridTop = 0 }: { x:
   //   console.log('SmoothY changed to:', latest);
   // });
 
-  // Calculate miles based on indicator's x position + scroll position relative to course profile SVG width
+  // Calculate miles based on indicator's x position + scroll position using store utilities
   const miles = useTransform([x, scrollX], (values: number[]) => {
     const [mouseX, scrollXValue] = values;
     // Calculate the actual position on the page (mouse position + scroll)
     const pageX = mouseX + scrollXValue;
-    // Use the actual course profile SVG width (3072px) to calculate ratio
-    const ratio = Math.max(0, Math.min(1, pageX / COURSE_PROFILE_SVG_WIDTH));
-    // Convert to miles (rounded to nearest tenth)
-    const milesValue = (ratio * TOTAL_DISTANCE);
-    // Debug logging
-    return milesValue;
+    // Use store utility to convert pageX to distance
+    return elevationUtils.pageXToDistance(pageX);
   });
 
   // Add smoothing to the miles value to match scroll smoothing
@@ -67,6 +66,17 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised, gridTop = 0 }: { x:
 
   // Create a template for the miles display
   const milesDisplay = useMotionTemplate`${formattedMiles} MI`;
+
+  // Calculate elevation at current position using store utility
+  const elevation = useTransform(smoothMiles, (miles) => {
+    return elevationUtils.getElevationAtDistance(miles);
+  });
+
+  // Format elevation to nearest foot
+  const formattedElevation = useTransform(elevation, (value) => Math.round(value).toString());
+
+  // Create a template for the elevation display
+  const elevationDisplay = useMotionTemplate`${formattedElevation} FT`;
 
   return (
     <motion.div
@@ -87,6 +97,9 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised, gridTop = 0 }: { x:
         <div className="text-right">
           <motion.div className="text-xs">${fundraised}</motion.div>
           <motion.div className="text-xs">{milesDisplay}</motion.div>
+          {elevationData && (
+            <motion.div className="text-xs text-neutral-400">{elevationDisplay}</motion.div>
+          )}
         </div>
       </motion.div>
     </motion.div>
