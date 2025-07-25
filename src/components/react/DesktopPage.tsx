@@ -253,6 +253,8 @@ export default function DesktopPage({ campaignData }: PageProps) {
             width={3072}
             height={180}
             className="w-full"
+            mouseX={mouseX}
+            scrollX={scrollX}
           />
         </div>
       </div>

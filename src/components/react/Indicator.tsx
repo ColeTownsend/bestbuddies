@@ -174,10 +174,11 @@ export function Indicator({
         {isVisible && (
           <motion.div
             layoutId="minimap-marker"
-            className="absolute -top-[5px] block translate-x-[-4.5px]"
+            className="absolute border-2 border-white shadow-lg -top-[5px] block translate-x-[-4.5px]"
+
             style={{
-              width: "10px",
-              height: "10px",
+              width: "12px",
+              height: "12px",
               borderRadius: "50%",
               background: "var(--color-pink11)",
             }}
