@@ -129,15 +129,15 @@ export function ElevationProfileSVG({
 
   // Apply centering offset for the 12px marker (subtract 6px to center)
   const smoothMarkerX = useSpring(useTransform(markerX, x => x - 6), {
-    stiffness: 400,
-    damping: 30,
-    mass: 0.8,
+    stiffness: 400 * 0.25, // Match the SCROLL_SMOOTHING value from page.tsx
+    damping: 40,
+    mass: 0.8 / 0.25,
   });
 
   const smoothMarkerY = useSpring(useTransform(markerY, y => y - 6), {
-    stiffness: 400,
-    damping: 30,
-    mass: 0.8,
+    stiffness: 400 * 0.25, // Match the SCROLL_SMOOTHING value from page.tsx
+    damping: 40,
+    mass: 0.8 / 0.25,
   });
 
   // Always create motion values for marker position, but provide fallbacks
