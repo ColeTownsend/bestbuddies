@@ -247,7 +247,7 @@ export function ElevationProfileSVG({
       {/* Elevation marker that follows the curve */}
       {mouseX && scrollX && elevationData && elevationData.points.length > 0 && (
         <motion.div
-          className="absolute pointer-events-none"
+          className="absolute z-[10000] pointer-events-none"
           style={{
             left: smoothMarkerX,
             top: smoothMarkerY,
