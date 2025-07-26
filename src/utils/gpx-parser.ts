@@ -153,13 +153,8 @@ export function getElevationDataset(profile: ElevationProfile, options: {
 // Load and parse the route GPX file
 export async function loadRouteProfile(): Promise<ElevationProfile> {
   try {
-    // Try to load from both possible locations
-    let response;
-    try {
-      response = await fetch('/src/assets/route.gpx');
-    } catch {
-      response = await fetch('/route.gpx');
-    }
+    // Load from public folder
+    const response = await fetch('/route.gpx');
     const gpxContent = await response.text();
     return await parseGPXFile(gpxContent);
   } catch (error) {
