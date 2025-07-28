@@ -48,8 +48,8 @@ export default function DesktopPage({ campaignData }: PageProps) {
   const [soundEnabled, setSoundEnabled] = React.useState(true);
   const [hasInteracted, setHasInteracted] = React.useState(false);
 
-  // Only enable sounds if user has interacted AND sound is enabled
-  const actualSoundEnabled = hasInteracted && soundEnabled;
+  // Enable sounds based on user preference only (removed hasInteracted requirement)
+  const actualSoundEnabled = soundEnabled;
 
   const popClick = useSound("/sounds/pop-click.wav", { ...POP_SOUND_OPTIONS, soundEnabled: actualSoundEnabled });
   const tick = useSound("/sounds/tick.mp3", { ...TICK_SOUND_OPTIONS, soundEnabled: actualSoundEnabled });

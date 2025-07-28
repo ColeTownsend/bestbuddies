@@ -9,7 +9,7 @@ export function useSound(path: string, options?: any & { soundEnabled?: boolean 
   const { soundEnabled = true, ...otherOptions } = options || {};
 
   const [play] = useSound_(path, {
-    soundEnabled: !isMobile && soundEnabled,
+    soundEnabled: soundEnabled,
     ...otherOptions,
   });
 
