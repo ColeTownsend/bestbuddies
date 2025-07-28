@@ -9,7 +9,7 @@ import { useSound } from "./use-sound";
 import DonationCard from "./donation-card";
 import { useMousePosition } from "./utils";
 import { Indicator } from "./Indicator";
-import CourseProfileMask from "./CourseProfileMask";
+import { Volume2, VolumeX } from "lucide-react";
 import ElevationProfileSVG from "./ElevationProfileSVG";
 // Elevation data is now managed by the store
 
@@ -44,8 +44,15 @@ export const MAX = COURSE_PROFILE_WIDTH;
 const SCROLL_SMOOTHING = 0.25;
 
 export default function DesktopPage({ campaignData }: PageProps) {
-  const popClick = useSound("/sounds/pop-click.wav", POP_SOUND_OPTIONS);
-  const tick = useSound("/sounds/tick.mp3", TICK_SOUND_OPTIONS);
+  // Volume state - default visual to true, but track if user has interacted
+  const [soundEnabled, setSoundEnabled] = React.useState(true);
+  const [hasInteracted, setHasInteracted] = React.useState(false);
+
+  // Only enable sounds if user has interacted AND sound is enabled
+  const actualSoundEnabled = hasInteracted && soundEnabled;
+
+  const popClick = useSound("/sounds/pop-click.wav", { ...POP_SOUND_OPTIONS, soundEnabled: actualSoundEnabled });
+  const tick = useSound("/sounds/tick.mp3", { ...TICK_SOUND_OPTIONS, soundEnabled: actualSoundEnabled });
   const containerRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null); // NEW: ref for #grid
   const [gridTop, setGridTop] = React.useState(0); // NEW: state for grid top offset
@@ -179,7 +186,33 @@ export default function DesktopPage({ campaignData }: PageProps) {
                 Best Buddies Challenge
               </h1>
             </div>
-            <div className="col-span-1"></div>
+            <div className="col-span-1 relative">
+              <motion.div
+                whileTap={{ scale: 1.1 }}
+                className="absolute bottom-0 left-0"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the global click sound
+
+                  if (!hasInteracted) {
+                    // First click: enable interaction and keep sounds on
+                    setHasInteracted(true);
+                    // Play pop sound after enabling interaction
+                    setTimeout(() => popClick(), 0);
+                  } else {
+                    // Subsequent clicks: normal toggle behavior
+                    setSoundEnabled(!soundEnabled);
+                    // Play pop sound for toggle
+                    popClick();
+                  }
+                }}
+              >
+                {soundEnabled ? (
+                  <Volume2 className="w-5 h-5 cursor-pointer text-gray-500 absolute bottom-0 left-0" />
+                ) : (
+                  <VolumeX className="w-5 h-5 cursor-pointer text-gray-500 absolute bottom-0 left-0" />
+                )}
+              </motion.div>
+            </div>
             <div className="col-span-1">
               <p className="text-base mb-4">
                 This past year I tore my meniscus, and I've been unable to run. I've taken up cycling.
@@ -265,7 +298,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
         fundraised={campaignData?.currentAmount || 0}
         isVisible={!isDonationCardHovered}
         gridTop={gridTop}
-        // elevationData prop no longer needed - using store
+      // elevationData prop no longer needed - using store
       />
     </main>
   );

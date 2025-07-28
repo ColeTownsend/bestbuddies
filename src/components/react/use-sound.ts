@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import useSound_ from "use-sound";
 
-export function useSound(path: string, options?: any) {
+export function useSound(path: string, options?: any & { soundEnabled?: boolean }) {
   const isTouchDevice = useMediaQuery("(hover: none)");
   const isTinyDevice = useMediaQuery("(max-width: 480px)");
   const isMobile = isTouchDevice || isTinyDevice;
 
+  const { soundEnabled = true, ...otherOptions } = options || {};
+
   const [play] = useSound_(path, {
-    soundEnabled: !isMobile,
-    ...options,
+    soundEnabled: !isMobile && soundEnabled,
+    ...otherOptions,
   });
 
   return play;
