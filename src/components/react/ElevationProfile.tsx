@@ -57,12 +57,6 @@ export function ElevationProfile({
 
   // Animation values
   const animationProgress = useMotionValue(0);
-  const smoothProgress = useSpring(animationProgress, {
-    stiffness: 400,
-    damping: 10,
-    mass: 0.8,
-  });
-
   // Data loading is handled by the store hook
 
   // Animate entrance
@@ -328,7 +322,7 @@ export function ElevationProfile({
           options={chartOptions}
           plugins={[hoverMarkerPlugin]}
         />
-        
+
         {/* Chart-specific tooltip */}
         {chartTooltip && (
           <div
