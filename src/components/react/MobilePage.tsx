@@ -109,12 +109,7 @@ export default function MobilePage({ campaignData }: PageProps) {
           </AnimatedText>
           <AnimatedText>
             <p className="text-base mb-4">
-              This September, I'll be riding 100 miles through New York City as part of the Best Buddies Challenge — a fundraising ride that combines my love for cycling with supporting an incredible cause.
-            </p>
-          </AnimatedText>
-          <AnimatedText>
-            <p className="text-base">
-              Some of the people I ride with work with a group called <span className="text-pink11">Best Buddies</span>.
+              This September, I'll be riding 100 miles through New York City as part of the Best <span className="text-pink11">Buddies</span> Challenge.
             </p>
           </AnimatedText>
 
