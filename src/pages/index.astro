@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Layout from "../layouts/Layout.astro";
 import DesktopPage from "../components/react/DesktopPage";
 import MobilePage from "../components/react/MobilePage";
@@ -41,6 +43,8 @@ const campaignData = {
   supporters: supporters?.map((s) => s.name),
   supportersCount: supporters?.length || 0,
 };
+
+console.log("🔍 Campaign data:", campaignData);
 ---
 
 <Layout>

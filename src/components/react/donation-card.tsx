@@ -26,7 +26,7 @@ const FALLBACK_DATA: CampaignData = {
 };
 
 export default function DonationCard({ campaignData, onHoverChange, isHovered }: DonationCardProps) {
-  const data = FALLBACK_DATA;
+  const data = campaignData || FALLBACK_DATA;
   const { currentAmount, goalAmount, supporters, supportersCount } = data;
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, amount: 'all' });
