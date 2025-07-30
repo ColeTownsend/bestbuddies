@@ -109,7 +109,7 @@ export default function MobilePage({ campaignData }: PageProps) {
           </AnimatedText>
           <AnimatedText>
             <p className="text-base mb-4">
-              This September, I'll be riding 100 miles through New York City as part of the Best <span className="text-pink11">Buddies</span> Challenge.
+              This September, I'll be riding 100 miles starting from New York City as part of the <span className="text-pink11">Best Buddies</span> Challenge, a fundraising event for <span className="text-pink11">Best Buddies International</span>.
             </p>
           </AnimatedText>
 
@@ -120,7 +120,7 @@ export default function MobilePage({ campaignData }: PageProps) {
           </AnimatedText>
           <AnimatedText>
             <p className="text-base mb-4">
-              I'm fundraising to support <span className="text-pink11">Best Buddies'</span> programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD. <a className="text-gray-400" href="https://www.bestbuddies.org/about-us/where-the-dollar-goes/">How they spend their money</a>
+              Fundraising will support programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD. <a className="text-gray-400" href="https://www.bestbuddies.org/about-us/where-the-dollar-goes/">Here's how they spend their money.</a>
             </p>
           </AnimatedText>
           <AnimatedText>
@@ -147,27 +147,33 @@ export default function MobilePage({ campaignData }: PageProps) {
           </AnimatedText>
           <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
-              My fundraising goal is $1,800, and I should surpass that.
+              My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
             </p>
           </AnimatedText>
           <AnimatedText>
             <p className="text-base mb-4">
-              <span className="font-mono font-400 text-[18px]">$25</span> — Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
+              $25: Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
             </p>
           </AnimatedText>
           <AnimatedText>
             <p className="text-base mb-4">
-              <span className="font-mono font-400 text-[18px]">$50</span> — Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
+              $50: Provides a Best Buddies Jobs participant with one hour of job coaching, where an employment candidate with IDD can practice interview skills, prepare for job readiness, or receive on-the-job support so he or she can excel in a new placement.
             </p>
           </AnimatedText>
-          <AnimatedText className="col-span-1">
+          <AnimatedText>
             <p className="text-base mb-4">
-              <span className="font-mono font-400 text-[18px]">$100</span> — Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
+              $100: Funds an online e-Buddies friendship between a person with and a person without IDD. By joining e-Buddies, participants become more comfortable using technology to communicate with friends, gain computer literacy skills, and are better equipped to socialize online in the future.
             </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base mb-4">
-              <span className="font-mono font-400 text-[18px]">$250</span> — Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.            </p>
+              $250: Supports a one-to-one friendship between someone with IDD and their peer, helping to build a mutually enriching connection that enhances the lives of program participants and their families.
+            </p>
+          </AnimatedText>
+          <AnimatedText>
             <p className="text-base mb-4">
-              <span className="font-mono font-400 text-[18px]">$1000</span> — Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.            </p>
+              $1,000: Gives a student leader, Ambassador, or Jobs participant the opportunity to attend the annual Best Buddies Leadership Conference, where they will learn how to become an advocate for the IDD community.
+            </p>
           </AnimatedText>
           <div className="col-span-1 mt-8">
             <DonationCard campaignData={campaignData} />

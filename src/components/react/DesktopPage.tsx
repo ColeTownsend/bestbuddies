@@ -222,7 +222,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
                 It has also provided me a second identity (although my running identity will never be replaced), and a group to hang out with. I started riding recently and felt so welcomed into the group I now ride with.
               </p>
               <p className="text-base mb-4">
-                This September, I'll be riding 100 miles through New York City as part of the Best <span className="text-pink11">Buddies</span> Challenge.
+                This September, I'll be riding 100 miles starting from New York City as part of the <span className="text-pink11">Best Buddies</span> Challenge, a fundraising event for <span className="text-pink11">Best Buddies International</span>.
               </p>
             </div>
             <div className="col-span-1">
@@ -230,8 +230,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
                 <span className="text-pink11">Best Buddies International</span> is the largest organization dedicated to ending the social, physical and economic isolation of the 200 million people worldwide with intellectual and developmental disabilities (IDD).
               </p>
               <p className="text-base mb-4">
-                This September, I'll be riding 100 miles through New York City as part of the Best Buddies Challenge.
-                . I'm fundraising to support <span className="text-pink11">Best Buddies'</span> programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD.
+                Fundraising will support programs that create opportunities for one-to-one friendships, integrated employment, inclusive living, leadership development, and family support for people with IDD. <a className="text-gray-400" href="https://www.bestbuddies.org/about-us/where-the-dollar-goes/">Here's how they spend their money.</a>
               </p>
               <p className="text-base">
                 Running and cycling have given me a place to belong, and I want to support <span className="text-pink11">Best Buddies</span> mission to do the same for others.
