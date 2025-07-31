@@ -10,6 +10,9 @@ interface ElevationProfileSVGProps {
   // Props for syncing with the Indicator
   mouseX?: MotionValue<number>;
   scrollX?: MotionValue<number>;
+  // Props for fundraising progress fill
+  moneyRaised?: number;
+  goalAmount?: number;
 }
 
 const DEFAULT_WIDTH = 3072;
@@ -20,7 +23,9 @@ export function ElevationProfileSVG({
   height = DEFAULT_HEIGHT,
   className = "",
   mouseX,
-  scrollX
+  scrollX,
+  moneyRaised = 0,
+  goalAmount = 1
 }: ElevationProfileSVGProps) {
   const [elevationData, setElevationData] = React.useState<ElevationProfile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -123,21 +128,40 @@ export function ElevationProfileSVG({
     return pathString;
   }, [elevationData, width, height]);
 
+  // Animation for fundraising fill
+  const fillProgress = useMotionValue(0);
+  const animatedFillWidth = useSpring(fillProgress, {
+    stiffness: 400 * 0.25, // Match the SCROLL_SMOOTHING value from page.tsx
+    damping: 40,
+    mass: 0.8 / 0.25,
+  });
+
+  // Animated clip width for fundraising progress
+  const animatedClipWidth = useTransform(animatedFillWidth, (progress) => progress * width);
+
+  // Animate fill on load when data is available
+  React.useEffect(() => {
+    if (!isLoading && elevationData && goalAmount > 0) {
+      const progressRatio = Math.min(1, Math.max(0, moneyRaised / goalAmount));
+      fillProgress.set(progressRatio);
+    }
+  }, [isLoading, elevationData, moneyRaised, goalAmount, fillProgress]);
+
   // Create smooth springs for marker animation
   const markerX = useMotionValue(0);
   const markerY = useMotionValue(height / 2);
 
   // Apply centering offset for the 12px marker (subtract 6px to center)
   const smoothMarkerX = useSpring(useTransform(markerX, x => x - 6), {
-    stiffness: 400 * 0.25, // Match the SCROLL_SMOOTHING value from page.tsx
+    stiffness: 400 * 0.5, // Match the SCROLL_SMOOTHING value from page.tsx
     damping: 40,
-    mass: 0.8 / 0.25,
+    mass: 0.8 / 0.5,
   });
 
   const smoothMarkerY = useSpring(useTransform(markerY, y => y - 6), {
     stiffness: 400 * 0.25, // Match the SCROLL_SMOOTHING value from page.tsx
     damping: 40,
-    mass: 0.8 / 0.25,
+    mass: 0.8 / 0.5,
   });
 
   // Always create motion values for marker position, but provide fallbacks
@@ -226,18 +250,37 @@ export function ElevationProfileSVG({
         style={{ display: 'block' }}
         xmlns="http://www.w3.org/2000/svg"
       >
+        <defs>
+          <clipPath id="fundraising-progress-clip">
+            <motion.rect
+              x={0}
+              y={0}
+              width={animatedClipWidth}
+              height={height}
+            />
+          </clipPath>
+        </defs>
+
         {/* Filled area */}
         <path
           d={pathData}
-          fill="rgba(156, 163, 175, 0.2)"
+          fill="rgba(156, 163, 175, 0.25)"
           stroke="none"
+        />
+
+        {/* Fundraising progress fill - same path but clipped and different color */}
+        <path
+          d={pathData}
+          fill="rgba(255, 15, 139, 0.5)"
+          stroke="none"
+          clipPath="url(#fundraising-progress-clip)"
         />
 
         {/* Stroke line */}
         <path
           d={strokePathData}
           fill="none"
-          stroke="rgba(156, 163, 175, 0.1)"
+          stroke="rgba(156, 163, 175, 0.05)"
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"

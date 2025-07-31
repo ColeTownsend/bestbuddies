@@ -30,6 +30,7 @@
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.0",
+    "react-useanimations": "^2.10.0",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3",
     "use-sound": "^5.0.0",

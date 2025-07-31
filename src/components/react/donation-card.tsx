@@ -159,14 +159,12 @@ export default function DonationCard({ campaignData, onHoverChange, isHovered }:
                 )}
               </AnimatePresence>
               {supporters.map((supporter, index) => (
-                <AnimatePresence>
-                  <div
-                    key={index}
-                    className="text-gray-900 rounded-2 font-medium text-sm py-1 px-2 transition-colors"
-                  >
-                    {supporter}
-                  </div>
-                </AnimatePresence>
+                <div
+                  key={index}
+                  className="text-gray-900 rounded-2 font-medium text-sm py-1 px-2 transition-colors"
+                >
+                  {supporter}
+                </div>
               ))}
 
             </motion.div>

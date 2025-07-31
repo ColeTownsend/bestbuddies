@@ -9,8 +9,11 @@ import { useSound } from "./use-sound";
 import DonationCard from "./donation-card";
 import { useMousePosition } from "./utils";
 import { Indicator } from "./Indicator";
-import { Volume2, VolumeX } from "lucide-react";
 import ElevationProfileSVG from "./ElevationProfileSVG";
+import UseAnimations from 'react-useanimations';
+import volume from 'react-useanimations/lib/volume'
+import { VolumeIcon } from "./Volume";
+
 // Elevation data is now managed by the store
 
 interface CampaignData {
@@ -206,11 +209,9 @@ export default function DesktopPage({ campaignData }: PageProps) {
                   }
                 }}
               >
-                {soundEnabled ? (
-                  <Volume2 className="w-5 h-5 cursor-pointer text-gray-500 absolute bottom-0 left-0" />
-                ) : (
-                  <VolumeX className="w-5 h-5 cursor-pointer text-gray-500 absolute bottom-0 left-0" />
-                )}
+                <div className="absolute -bottom-4 cursor-pointer -left-4">
+                  <VolumeIcon className="p-4" size={20} isActive={soundEnabled} setIsActive={setSoundEnabled} />
+                </div>
               </motion.div>
             </div>
             <div className="col-span-1">
@@ -288,6 +289,8 @@ export default function DesktopPage({ campaignData }: PageProps) {
             className="w-full"
             mouseX={mouseX}
             scrollX={scrollX}
+            moneyRaised={campaignData?.currentAmount || 0}
+            goalAmount={campaignData?.goalAmount || 1800}
           />
         </div>
       </div>
