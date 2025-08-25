@@ -1,4 +1,6 @@
 import { useMotionValue } from "motion/react";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function useMousePosition() {
   const mouseX = useMotionValue<number>(0);
@@ -27,4 +29,8 @@ export function useMousePosition() {
   }
 
   return { mouseX, mouseY, onMouseMove, onMouseLeave };
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

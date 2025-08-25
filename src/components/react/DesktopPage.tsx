@@ -10,9 +10,8 @@ import DonationCard from "./donation-card";
 import { useMousePosition } from "./utils";
 import { Indicator } from "./Indicator";
 import ElevationProfileSVG from "./ElevationProfileSVG";
-import UseAnimations from 'react-useanimations';
-import volume from 'react-useanimations/lib/volume'
 import { VolumeIcon } from "./Volume";
+import { TextEffect } from "./motion-primitives/text-effect";
 
 // Elevation data is now managed by the store
 
@@ -50,6 +49,10 @@ export default function DesktopPage({ campaignData }: PageProps) {
   // Volume state - default visual to true, but track if user has interacted
   const [soundEnabled, setSoundEnabled] = React.useState(true);
   const [hasInteracted, setHasInteracted] = React.useState(false);
+  const [isVolumeHovered, setIsVolumeHovered] = React.useState(false);
+  const [isSoundLabelIntroDone, setIsSoundLabelIntroDone] = React.useState(false);
+  const [hasInitialHideDelayElapsed, setHasInitialHideDelayElapsed] = React.useState(false);
+  const initialHideTimeoutRef = React.useRef<number | null>(null);
 
   // Enable sounds based on user preference only (removed hasInteracted requirement)
   const actualSoundEnabled = soundEnabled;
@@ -94,6 +97,14 @@ export default function DesktopPage({ campaignData }: PageProps) {
       window.removeEventListener("click", handleClick);
     };
   }, [popClick]);
+
+  React.useEffect(() => {
+    return () => {
+      if (initialHideTimeoutRef.current !== null) {
+        window.clearTimeout(initialHideTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Elevation data loading is now handled by the store
 
@@ -210,7 +221,29 @@ export default function DesktopPage({ campaignData }: PageProps) {
                 }}
               >
                 <div className="absolute -bottom-4 cursor-pointer -left-4">
-                  <VolumeIcon className="p-4" size={20} isActive={soundEnabled} setIsActive={setSoundEnabled} />
+                  <motion.div layout className="relative flex items-center w-max p-4" onHoverStart={() => setIsVolumeHovered(true)} onHoverEnd={() => setIsVolumeHovered(false)}>
+                    <VolumeIcon size={20} isActive={soundEnabled} setIsActive={setSoundEnabled} />
+                    <motion.span
+                      className="text-xs ml-2 w-full block relative top-[1.5px]"
+                      variants={{
+                        hidden: { opacity: 0, filter: 'blur(4px)', x: -5 },
+                        visible: { opacity: 1, filter: 'blur(0px)', x: 0 },
+                      }}
+                      initial="hidden"
+                      animate={!hasInitialHideDelayElapsed || isVolumeHovered ? 'visible' : 'hidden'}
+                      transition={{ type: 'spring', stiffness: 100, damping: 20, delay: isSoundLabelIntroDone ? 0 : 0.5 }}
+                      onAnimationComplete={() => {
+                        if (!isSoundLabelIntroDone) {
+                          setIsSoundLabelIntroDone(true);
+                          initialHideTimeoutRef.current = window.setTimeout(() => {
+                            setHasInitialHideDelayElapsed(true);
+                          }, 2000);
+                        }
+                      }}
+                    >
+                      Click anywhere for sound effects
+                    </motion.span>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -223,7 +256,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
                 It has also provided me a second identity (although my running identity will never be replaced), and a group to hang out with. I started riding recently and felt so welcomed into the group I now ride with.
               </p>
               <p className="text-base mb-4">
-                This September, I'll be riding 100 miles starting from New York City as part of the <span className="text-pink11">Best Buddies</span> Challenge, a fundraising event for <span className="text-pink11">Best Buddies International</span>.
+                On October 4th, I'll be riding 100 miles starting from New York City as part of the <span className="text-pink11">Best Buddies</span> Challenge, a fundraising event for <span className="text-pink11">Best Buddies International</span>.
               </p>
             </div>
             <div className="col-span-1">
