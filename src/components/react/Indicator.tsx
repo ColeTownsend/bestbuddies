@@ -38,7 +38,7 @@ function MileMarkerTooltip({ x, mouseY, scrollX, fundraised, gridTop = 0 }: { x:
   });
 
   // Offset the tooltip above the cursor (no gridTop here)
-  const offsetY = useTransform(smoothY, (y) => y - TOOLTIP_OFFSET - gridTop + 40);
+  const offsetY = useTransform(smoothY, (y) => y - TOOLTIP_OFFSET - gridTop + 50);
 
   // Debug: Listen to smoothY changes
   // useMotionValueEvent(smoothY, "change", (latest) => {
