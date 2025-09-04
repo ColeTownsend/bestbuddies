@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/cloudflare": "12.6.5",
+    "@astrojs/cloudflare": "12.6.6",
     "@astrojs/react": "^4.3.0",
     "@fontsource/permanent-marker": "^5.2.6",
     "@fontsource/silkscreen": "^5.2.6",
