@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Fragment, useState } from 'react';
 import type { HTMLAttributes } from 'react';
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 export interface VolumeIconHandle {
   startAnimation: () => void;
