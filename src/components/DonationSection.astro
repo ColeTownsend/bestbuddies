@@ -28,8 +28,13 @@ try {
   throw error;
 }
 
-// Calculate current amount from sum of donations
-const totalAmount = supporters.reduce(
+// Filter out donations by Cole Townsend for $575
+const filteredSupporters = supporters.filter(
+  (s) => !(s.name === "Cole Townsend" && s.donation_amount === 575)
+);
+
+// Calculate current amount from sum of donations (after filtering)
+const totalAmount = filteredSupporters.reduce(
   (sum, supporter) => sum + supporter.donation_amount,
   0
 );
@@ -38,8 +43,8 @@ const totalAmount = supporters.reduce(
 const campaignData = {
   currentAmount: totalAmount,
   goalAmount: campaign?.goal_amount || 1800,
-  supporters: supporters.map((s) => s.name),
-  supportersCount: supporters.length,
+  supporters: filteredSupporters.map((s) => s.name),
+  supportersCount: filteredSupporters.length,
 };
 ---
 
