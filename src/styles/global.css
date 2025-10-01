@@ -489,4 +489,5 @@ h3 {
 
 .text-base {
   line-height: 28px;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
