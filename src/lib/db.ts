@@ -113,6 +113,13 @@ export class SupporterQueries {
   }
 
   static async createSupporter(supporter: Omit<Supporter, 'id'>): Promise<Supporter> {
+    // Guard: prevent storing Cole Townsend's $575 donation in Turso
+    const normalizedName = supporter.name.trim().toLowerCase();
+    if (normalizedName === 'cole townsend' && supporter.donation_amount === 575) {
+      console.warn('[SupporterQueries] Skipping insert for filtered supporter: Cole Townsend $575');
+      throw new Error('Filtered supporter skipped: Cole Townsend $575');
+    }
+
     const result = await db.execute({
       sql: 'INSERT INTO Supporters (name, donation_amount, campaign_id, created_at) VALUES (?, ?, ?, ?) RETURNING *',
       args: [supporter.name, supporter.donation_amount, supporter.campaign_id, supporter.created_at]
