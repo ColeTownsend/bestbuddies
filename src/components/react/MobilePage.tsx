@@ -147,7 +147,7 @@ export default function MobilePage({ campaignData }: PageProps) {
           </AnimatedText>
           <AnimatedText className="col-span-1">
             <p className="text-base mb-4">
-              My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
+              My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $500 myself.
             </p>
           </AnimatedText>
           <AnimatedText>

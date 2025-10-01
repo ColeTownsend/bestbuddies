@@ -281,7 +281,7 @@ export default function DesktopPage({ campaignData }: PageProps) {
             </div>
             <div className="col-span-1">
               <p className="text-base mb-4">
-                My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $1,000 myself.
+                My fundraising goal is $1,800, and should surpass that. I'm matching donations up to $500 myself.
               </p>
               <p className="text-base mb-4">
                 $25: Supplies training and instruction for interactive activities, lesson plans, and tool kits for school students in a Best Buddies chapter so that they can learn about acceptance and inclusion at a young age.
