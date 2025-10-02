@@ -100,15 +100,18 @@ export class SupporterQueries {
 
   static async getSupportersByCampaign(campaignId: number): Promise<Supporter[]> {
     const result = await db.execute({
-      sql: 'SELECT * FROM Supporters WHERE campaign_id = ? ORDER BY id DESC',
-      args: [campaignId]
+      sql: 'SELECT * FROM Supporters WHERE campaign_id = ? AND NOT (LOWER(name) = ? AND donation_amount = ?) ORDER BY id DESC',
+      args: [campaignId, 'cole townsend', 575]
     });
 
     return result.rows.map(rowToSupporter);
   }
 
   static async getAllSupporters(): Promise<Supporter[]> {
-    const result = await db.execute('SELECT * FROM Supporters ORDER BY id DESC');
+    const result = await db.execute({
+      sql: 'SELECT * FROM Supporters WHERE NOT (LOWER(name) = ? AND donation_amount = ?) ORDER BY id DESC',
+      args: ['cole townsend', 575]
+    });
     return result.rows.map(rowToSupporter);
   }
 
